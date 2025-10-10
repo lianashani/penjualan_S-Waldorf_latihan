@@ -2,63 +2,74 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Promo;
 use Illuminate\Http\Request;
 
 class PromoController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $promos = Promo::orderBy('tanggal_mulai', 'desc')->get();
+        return view('home.promo.index', compact('promos'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return view('home.promo.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'kode_promo' => 'required|string|max:50|unique:promos,kode_promo',
+            'persen' => 'required|numeric|min:0|max:100',
+            'tanggal_mulai' => 'required|date',
+            'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
+            'status' => 'required|in:aktif,nonaktif'
+        ]);
+
+        Promo::create($request->all());
+
+        return redirect()->route('promo.index')
+            ->with('success', 'Promo berhasil ditambahkan!');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show($id)
     {
-        //
+        $promo = Promo::with('penjualans')->findOrFail($id);
+        return view('home.promo.show', compact('promo'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function edit($id)
     {
-        //
+        $promo = Promo::findOrFail($id);
+        return view('home.promo.edit', compact('promo'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
-        //
+        $promo = Promo::findOrFail($id);
+        
+        $request->validate([
+            'kode_promo' => 'required|string|max:50|unique:promos,kode_promo,' . $id . ',id_promo',
+            'persen' => 'required|numeric|min:0|max:100',
+            'tanggal_mulai' => 'required|date',
+            'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
+            'status' => 'required|in:aktif,nonaktif'
+        ]);
+
+        $promo->update($request->all());
+
+        return redirect()->route('promo.index')
+            ->with('success', 'Promo berhasil diupdate!');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        //
+        $promo = Promo::findOrFail($id);
+        $promo->delete();
+
+        return redirect()->route('promo.index')
+            ->with('success', 'Promo berhasil dihapus!');
     }
 }

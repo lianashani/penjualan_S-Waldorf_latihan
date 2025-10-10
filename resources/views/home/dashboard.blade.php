@@ -7,6 +7,9 @@
 
 @section('content')
 
+<h1 style="color: black !important;">Dashboard S&Waldorf</h1>
+<p style="color: black !important;">Selamat datang di sistem manajemen S&Waldorf</p>
+
 <!-- Statistics Cards Start -->
 <div class="card-group">
     <div class="card">
@@ -19,7 +22,7 @@
                             <p class="font-16 m-b-5">Jumlah User</p>
                         </div>
                         <div class="ml-auto">
-                            {{-- <h1 class="font-light text-right">{{ $userCount }}</h1> --}}
+                            <h1 class="font-light text-right">{{ $userCount }}</h1>
                         </div>
                     </div>
                 </div>
@@ -42,7 +45,7 @@
                             <p class="font-16 m-b-5">Jumlah Jenis</p>
                         </div>
                         <div class="ml-auto">
-                            {{-- <h1 class="font-light text-right">{{ $jenisCount }}</h1> --}}
+                            <h1 class="font-light text-right">{{ $jenisCount }}</h1>
                         </div>
                     </div>
                 </div>
@@ -65,7 +68,7 @@
                             <p class="font-16 m-b-5">Jumlah Produk</p>
                         </div>
                         <div class="ml-auto">
-                            {{-- <h1 class="font-light text-right">{{ $produkCount }}</h1> --}}
+                            <h1 class="font-light text-right">{{ $produkCount }}</h1>
                         </div>
                     </div>
                 </div>
@@ -88,7 +91,7 @@
                             <p class="font-16 m-b-5">Jumlah Transaksi</p>
                         </div>
                         <div class="ml-auto">
-                            {{-- <h1 class="font-light text-right">{{ $penjualanCount }}</h1> --}}
+                            <h1 class="font-light text-right">{{ $penjualanCount }}</h1>
                         </div>
                     </div>
                 </div>
@@ -103,6 +106,40 @@
 </div>
 <!-- Statistics Cards End -->
 
+<!-- Additional KPI Cards -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card" style="background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white;">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="m-r-20">
+                        <i class="mdi mdi-cash-multiple font-40"></i>
+                    </div>
+                    <div>
+                        <h3 class="m-b-0">Rp. {{ number_format($totalRevenue, 0, ',', '.') }}</h3>
+                        <span>Total Pendapatan</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card" style="background: linear-gradient(135deg, #dc2626, #f87171); color: white;">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="m-r-20">
+                        <i class="mdi mdi-alert-circle font-40"></i>
+                    </div>
+                    <div>
+                        <h3 class="m-b-0">{{ $lowStockCount }}</h3>
+                        <span>Produk Stok Rendah (≤10)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Status Stok Barang Start -->
 <div class="row">
     <div class="col-12">
@@ -116,27 +153,35 @@
                             <tr>
                                 <th>No</th>
                                 <th>Nama Produk</th>
+                                <th>Kategori</th>
                                 <th>Stok</th>
                                 <th>Status</th>
                             </tr>
-                        {{-- </thead>
+                        </thead>
                         <tbody>
-                            @foreach($produkList as $produk)
+                            @forelse($produkList as $produk)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $produk->nama_produk }}</td>
+                                <td>{{ $produk->kategori->nama_kategori ?? '-' }}</td>
                                 <td>{{ $produk->stok }}</td>
                                 <td>
                                     @if ($produk->stok <= 0)
                                         <span class="label label-danger">Kosong</span>
+                                    @elseif ($produk->stok <= 10)
+                                        <span class="label label-warning">Stok Rendah</span>
                                     @elseif ($produk->stok <= 50)
-                                        <span class="label label-warning">Sedikit</span>
+                                        <span class="label label-info">Stok Sedang</span>
                                     @else
-                                        <span class="label label-success">Ada</span>
+                                        <span class="label label-success">Stok Aman</span>
                                     @endif
                                 </td>
-                            </tr> --}}
-                            {{-- @endforeach --}}
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="5" class="text-center">Tidak ada data produk</td>
+                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -159,36 +204,46 @@
                             <tr>
                                 <th>No</th>
                                 <th>User</th>
-                                <th>Atas Nama</th>
-                                <th>Total Harga</th>
-                                <th>Bayar</th>
+                                <th>Pelanggan</th>
+                                <th>Total Bayar</th>
                                 <th>Kembalian</th>
-                                <th>Opsi Makanan</th>
+                                <th>Promo</th>
                                 <th>Tanggal</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
-                        {{-- <tbody>
-                            @foreach($penjualanList as $penjualan)
+                        <tbody>
+                            @forelse($penjualanList as $penjualan)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
-                                <td>{{ $penjualan->user->name }}</td>
-                                <td>{{ $penjualan->atas_nama }}</td>
-                                <td>Rp. {{ number_format($penjualan->total_harga, 0, ',', '.') }}</td>
-                                <td>Rp. {{ number_format($penjualan->bayar, 0, ',', '.') }}</td>
-                                <td>Rp. {{ number_format($penjualan->kembali, 0, ',', '.') }}</td>
-                                <td>{{ $penjualan->opsi_makanan }}</td>
-                                <td>{{ $penjualan->created_at->format('d/m/Y H:i') }}</td>
+                                <td>{{ $penjualan->user->nama_user ?? '-' }}</td>
+                                <td>{{ $penjualan->pelanggan->nama_pelanggan ?? 'Guest' }}</td>
+                                <td>Rp. {{ number_format($penjualan->total_bayar, 0, ',', '.') }}</td>
+                                <td>Rp. {{ number_format($penjualan->kembalian, 0, ',', '.') }}</td>
                                 <td>
-                                    @if ($penjualan->total_harga == 0)
-                                        <span class="label label-danger">Belum Selesai</span>
+                                    @if($penjualan->promo)
+                                        <span class="badge badge-success">{{ $penjualan->promo->kode_promo }} ({{ $penjualan->promo->persen }}%)</span>
                                     @else
+                                        <span class="badge badge-secondary">-</span>
+                                    @endif
+                                </td>
+                                <td>{{ $penjualan->tanggal_transaksi->format('d/m/Y H:i') }}</td>
+                                <td>
+                                    @if ($penjualan->status_transaksi == 'selesai')
                                         <span class="label label-success">Selesai</span>
+                                    @elseif ($penjualan->status_transaksi == 'pending')
+                                        <span class="label label-warning">Pending</span>
+                                    @else
+                                        <span class="label label-danger">Batal</span>
                                     @endif
                                 </td>
                             </tr>
-                            @endforeach
-                        </tbody> --}}
+                            @empty
+                            <tr>
+                                <td colspan="8" class="text-center">Tidak ada data transaksi</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
                     </table>
                 </div>
             </div>

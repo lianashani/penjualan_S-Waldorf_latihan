@@ -9,9 +9,7 @@ return new class extends Migration {
         Schema::create('produks', function (Blueprint $table) {
             $table->id('id_produk');
             $table->string('nama_produk', 100);
-            $table->foreignId('id_kategori')
-                  ->constrained('kategoris')
-                  ->cascadeOnDelete();
+            $table->unsignedBigInteger('id_kategori');
             $table->string('ukuran', 100);
             $table->string('warna', 100);
             $table->integer('stok')->default(0);
@@ -19,6 +17,9 @@ return new class extends Migration {
             $table->text('deskripsi')->nullable();
             $table->string('gambar')->nullable();
             $table->timestamps();
+
+            // Foreign key with correct column reference
+            $table->foreign('id_kategori')->references('id_kategori')->on('kategoris')->onDelete('cascade');
         });
     }
 

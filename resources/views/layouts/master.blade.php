@@ -100,7 +100,7 @@
                         <!-- Keranjang -->
                         @if(Auth::check() && Auth::user()->role != 'admin')
                         <li class="nav-item">
-                            <a class="nav-link waves-effect waves-dark" href="{{ route('keranjang.index') }}">
+                            <a class="nav-link waves-effect waves-dark" href="{{ route('keranjang.view') }}">
                                 <i class="mdi mdi-cart font-22"></i>
                                 @php $count = count(session('keranjang', [])); @endphp
                                 @if($count > 0)
@@ -144,7 +144,7 @@
                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <img src="{{ asset('assets/images/users/2.jpg') }}" alt="user" class="rounded-circle" width="40">
                                 <span class="m-l-5 font-medium d-none d-sm-inline-block">
-                                    {{ Auth::user()->name ?? 'Guest' }}
+                                    {{ Auth::user()->nama_user ?? 'Guest' }}
                                     <i class="mdi mdi-chevron-down"></i>
                                 </span>
                             </a>
@@ -257,7 +257,42 @@
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    {{-- <!-- Custom Scripts -->
+    <!-- Custom CSS for Content Text Color -->
+    <style>
+        /* Make all content text black */
+        .page-wrapper .container-fluid {
+            color: #000000 !important;
+        }
+        
+        .page-wrapper .card-body,
+        .page-wrapper .card-title,
+        .page-wrapper .card-subtitle,
+        .page-wrapper p,
+        .page-wrapper h1,
+        .page-wrapper h2,
+        .page-wrapper h3,
+        .page-wrapper h4,
+        .page-wrapper h5,
+        .page-wrapper h6,
+        .page-wrapper span:not(.badge),
+        .page-wrapper td,
+        .page-wrapper th,
+        .page-wrapper label {
+            color: #000000 !important;
+        }
+        
+        /* Keep white text on gradient cards */
+        .card[style*="gradient"] * {
+            color: #ffffff !important;
+        }
+        
+        /* Keep badge colors */
+        .badge {
+            color: #ffffff !important;
+        }
+    </style>
+
+    <!-- Custom Scripts -->
     <script>
         // SweetAlert2 for flash messages
         @if(session('success'))
@@ -276,31 +311,54 @@
             showConfirmButton: false,
             timer: 4000
           });
+        @elseif(session('warning'))
+          Swal.fire({
+            icon: 'warning',
+            title: 'PERHATIAN!',
+            text: '{{ session('warning') }}',
+            showConfirmButton: true
+          });
         @endif
 
-    //     // Logout confirmation
-    //     $(document).ready(function() {
-    //         $('#logoutLink').on('click', function(e) {
-    //             e.preventDefault();
-    //             Swal.fire({
-    //                 title: 'Konfirmasi Logout',
-    //                 text: "Anda yakin ingin keluar dari akun ini?",
-    //                 icon: 'warning',
-    //                 showCancelButton: true,
-    //                 confirmButtonColor: '#3085d6',
-    //                 cancelButtonColor: '#d33',
-    //                 confirmButtonText: 'Ya, logout',
-    //                 cancelButtonText: 'Batal'
-    //             }).then((result) => {
-    //                 if (result.isConfirmed) {
-    //                     // window.location.href = '{{ route("actionLogout") }}';
-    //                 }
-    //             });
-    //         });
-    //     });
-    // </script>
+        // Logout functionality
+        document.getElementById('sidebarLogout')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Logout?',
+                text: 'Apakah Anda yakin ingin keluar?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Logout!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('logout-form').submit();
+                }
+            });
+        });
 
-    @stack('scripts') --}}
+        document.getElementById('sidebarLogoutBottom')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Logout?',
+                text: 'Apakah Anda yakin ingin keluar?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Logout!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('logout-form').submit();
+                }
+            });
+        });
+    </script>
+
+    @stack('scripts')
 </body>
 
 </html>

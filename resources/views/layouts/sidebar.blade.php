@@ -7,16 +7,20 @@
                 <!-- User Profile-->
                 <li class="sidebar-item" style="margin-bottom: 20px;">
                     <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false">
-                        <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #4a90e2, #5ba3ff); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; margin-right: 12px; color: #ffffff;">
+                        <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #2c2c2c, #404040); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; margin-right: 12px; color: #ffffff; border: 2px solid #ffffff;">
                             @auth
-                                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                                {{ strtoupper(substr(Auth::user()->nama_user, 0, 1)) }}
                             @else
                                 G
                             @endauth
                         </div>
                         <span class="hide-menu">
                             @auth
-                                {{ Auth::user()->name }}
+                                {{ Auth::user()->nama_user }}
+                                <br>
+                                <small style="color: #999; font-size: 11px;">
+                                    {{ ucfirst(Auth::user()->role) }}
+                                </small>
                             @else
                                 Guest
                             @endauth
@@ -24,15 +28,15 @@
                     </a>
                     <ul aria-expanded="false" class="collapse first-level">
                         <li class="sidebar-item">
-                            <a href="javascript:void(0)" class="sidebar-link">
+                            <a href="{{ route('profile') }}" class="sidebar-link">
                                 <i class="ti-user"></i>
                                 <span class="hide-menu"> My Profile </span>
                             </a>
                         </li>
                         <li class="sidebar-item">
-                            <a href="javascript:void(0)" class="sidebar-link">
-                                <i class="ti-settings"></i>
-                                <span class="hide-menu"> Settings </span>
+                            <a href="{{ route('change-password') }}" class="sidebar-link">
+                                <i class="ti-lock"></i>
+                                <span class="hide-menu"> Change Password </span>
                             </a>
                         </li>
                         <li class="sidebar-item">
@@ -59,93 +63,101 @@
 
                 @auth
                 @if(Auth::user()->role == 'admin')
-                <!-- Admin Menu -->
+                <!-- ADMIN MENU -->
                 <li class="nav-small-cap">
                     <span class="hide-menu">Master Data</span>
                 </li>
 
                 <!-- User Management -->
                 <li class="sidebar-item {{ Request::is('user*') ? 'selected' : '' }}">
-                    <a class="sidebar-link waves-effect waves-dark" href="/" aria-expanded="false">
-                        <i class="ti-user"></i>
-                        <span class="hide-menu">Users</span>
+                    <a class="sidebar-link waves-effect waves-dark" href="{{ route('user.index') }}" aria-expanded="false">
+                        <i class="mdi mdi-account-key"></i>
+                        <span class="hide-menu">Kelola User</span>
                     </a>
                 </li>
 
-                <!-- Jenis Produk -->
-                <li class="sidebar-item {{ Request::is('jenis*') ? 'selected' : '' }}">
-                    <a class="sidebar-link waves-effect waves-dark" href="/}" aria-expanded="false">
-                        <i class="ti-tag"></i>
-                        <span class="hide-menu">Categories</span>
+                <!-- Kategori -->
+                <li class="sidebar-item {{ Request::is('kategori*') ? 'selected' : '' }}">
+                    <a class="sidebar-link waves-effect waves-dark" href="{{ route('kategori.index') }}" aria-expanded="false">
+                        <i class="mdi mdi-shape"></i>
+                        <span class="hide-menu">Kategori</span>
                     </a>
                 </li>
 
                 <!-- Produk -->
                 <li class="sidebar-item {{ Request::is('produk*') ? 'selected' : '' }}">
-                    <a class="sidebar-link waves-effect waves-dark" href="/}}" aria-expanded="false">
-                        <i class="ti-package"></i>
-                        <span class="hide-menu">Products</span>
+                    <a class="sidebar-link waves-effect waves-dark" href="{{ route('produk.index') }}" aria-expanded="false">
+                        <i class="mdi mdi-package-variant"></i>
+                        <span class="hide-menu">Produk</span>
                     </a>
                 </li>
 
-                <!-- Transaksi -->
-                <li class="nav-small-cap">
-                    <span class="hide-menu">Transactions</span>
+                <!-- Pelanggan -->
+                <li class="sidebar-item {{ Request::is('pelanggan*') ? 'selected' : '' }}">
+                    <a class="sidebar-link waves-effect waves-dark" href="{{ route('pelanggan.index') }}" aria-expanded="false">
+                        <i class="mdi mdi-account-multiple"></i>
+                        <span class="hide-menu">Pelanggan</span>
+                    </a>
                 </li>
 
-                <!-- Penjualan -->
-                <li class="sidebar-item {{ Request::is('penjualan*') ? 'selected' : '' }}">
-                    <a class="sidebar-link waves-effect waves-dark" href="/') }}" aria-expanded="false">
-                        <i class="ti-shopping-cart"></i>
-                        <span class="hide-menu">Sales</span>
+                <!-- Promo -->
+                <li class="sidebar-item {{ Request::is('promo*') ? 'selected' : '' }}">
+                    <a class="sidebar-link waves-effect waves-dark" href="{{ route('promo.index') }}" aria-expanded="false">
+                        <i class="mdi mdi-sale"></i>
+                        <span class="hide-menu">Promo Diskon</span>
+                    </a>
+                </li>
+
+                <!-- Katalog -->
+                <li class="nav-small-cap">
+                    <span class="hide-menu">Katalog</span>
+                </li>
+
+                <!-- Katalog Produk -->
+                <li class="sidebar-item {{ Request::is('katalog*') ? 'selected' : '' }}">
+                    <a class="sidebar-link waves-effect waves-dark" href="{{ route('katalog.index') }}" aria-expanded="false">
+                        <i class="mdi mdi-view-grid"></i>
+                        <span class="hide-menu">Katalog Produk</span>
                     </a>
                 </li>
 
                 <!-- Laporan -->
                 <li class="nav-small-cap">
-                    <span class="hide-menu">Reports</span>
+                    <span class="hide-menu">Laporan</span>
                 </li>
 
                 <!-- Laporan Penjualan -->
                 <li class="sidebar-item {{ Request::is('laporan*') ? 'selected' : '' }}">
-                    <a class="sidebar-link waves-effect waves-dark" href="/ }}" aria-expanded="false">
-                        <i class="ti-clipboard"></i>
-                        <span class="hide-menu">Sales Report</span>
+                    <a class="sidebar-link waves-effect waves-dark" href="{{ route('laporan.index') }}" aria-expanded="false">
+                        <i class="mdi mdi-file-chart"></i>
+                        <span class="hide-menu">Laporan Penjualan</span>
                     </a>
                 </li>
 
                 @else
-                <!-- Customer Menu -->
+                <!-- KASIR MENU -->
                 <li class="nav-small-cap">
-                    <span class="hide-menu">Shopping</span>
+                    <span class="hide-menu">Transaksi</span>
                 </li>
 
-                <!-- Produk -->
-                <li class="sidebar-item {{ Request::is('produk*') ? 'selected' : '' }}">
-                    <a class="sidebar-link waves-effect waves-dark" href="/}}" aria-expanded="false">
-                        <i class="ti-package"></i>
-                        <span class="hide-menu">Products</span>
+                <!-- Penjualan -->
+                <li class="sidebar-item {{ Request::is('penjualan*') ? 'selected' : '' }}">
+                    <a class="sidebar-link waves-effect waves-dark" href="{{ route('penjualan.index') }}" aria-expanded="false">
+                        <i class="mdi mdi-cart"></i>
+                        <span class="hide-menu">Transaksi Penjualan</span>
                     </a>
                 </li>
 
-                <!-- Keranjang -->
-                <li class="sidebar-item {{ Request::is('keranjang*') ? 'selected' : '' }}">
-                    <a class="sidebar-link waves-effect waves-dark" href="/') }}" aria-expanded="false">
-                        <i class="ti-shopping-cart"></i>
-                        <span class="hide-menu">Cart
-                            @php $count = count(session('keranjang', [])); @endphp
-                            @if($count > 0)
-                                <span class="badge badge-success" style="margin-left: 8px; padding: 4px 8px; border-radius: 12px; font-size: 10px;">{{ $count }}</span>
-                            @endif
-                        </span>
-                    </a>
+                <!-- Katalog -->
+                <li class="nav-small-cap">
+                    <span class="hide-menu">Katalog</span>
                 </li>
 
-                <!-- Riwayat Transaksi -->
-                <li class="sidebar-item {{ Request::is('transaksi*') ? 'selected' : '' }}">
-                    <a class="sidebar-link waves-effect waves-dark" href="/at') }}" aria-expanded="false">
-                        <i class="ti-receipt"></i>
-                        <span class="hide-menu">History</span>
+                <!-- Katalog Produk -->
+                <li class="sidebar-item {{ Request::is('katalog*') ? 'selected' : '' }}">
+                    <a class="sidebar-link waves-effect waves-dark" href="{{ route('katalog.index') }}" aria-expanded="false">
+                        <i class="mdi mdi-view-grid"></i>
+                        <span class="hide-menu">Katalog Produk</span>
                     </a>
                 </li>
                 @endif
@@ -162,6 +174,10 @@
                         <span class="hide-menu">Logout</span>
                     </a>
                 </li>
+                <!-- Logout Form (Hidden) -->
+                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                    @csrf
+                </form>
             </ul>
         </nav>
         <!-- End Sidebar navigation -->
@@ -169,95 +185,67 @@
     <!-- End Sidebar scroll-->
 </aside>
 
-<!-- Sidebar Dark Theme CSS -->
 <style>
-    /* Sidebar - Dark Theme (Hitam Pekat) */
-    .left-sidebar {
-        background: #000000;
-        border-right: 1px solid #1a1a1a;
-        box-shadow: 2px 0 15px rgba(0,0,0,0.8);
+    /* Sidebar Black Theme - Specific Only */
+    aside.left-sidebar {
+        background: #000000 !important;
     }
-
-    .sidebar-nav ul .sidebar-item .sidebar-link {
-        color: #ffffff;
-        padding: 14px 20px;
-        border-radius: 8px;
-        margin: 4px 10px;
-        transition: all 0.3s ease;
+    
+    aside.left-sidebar .scroll-sidebar {
+        background: #000000 !important;
     }
-
-    .sidebar-nav ul .sidebar-item .sidebar-link:hover {
-        background: #1a1a1a;
-        color: #ffffff;
-        transform: translateX(4px);
+    
+    aside.left-sidebar .sidebar-nav {
+        background: #000000 !important;
     }
-
-    .sidebar-nav ul .sidebar-item.selected .sidebar-link,
-    .sidebar-nav ul .sidebar-item .sidebar-link.active {
-        background: linear-gradient(135deg, #4a90e2, #5ba3ff);
-        color: #ffffff;
-        box-shadow: 0 4px 12px rgba(74, 144, 226, 0.4);
+    
+    aside.left-sidebar .sidebar-nav ul {
+        background: #000000 !important;
     }
-
-    .sidebar-nav .nav-small-cap {
-        color: #8a8a8a;
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        padding: 20px 20px 10px;
-        margin-top: 10px;
+    
+    aside.left-sidebar .sidebar-link,
+    aside.left-sidebar .sidebar-link span,
+    aside.left-sidebar .hide-menu {
+        color: #ffffff !important;
     }
-
-    .sidebar-nav ul .sidebar-item .sidebar-link i {
-        color: #ffffff;
-        margin-right: 10px;
-        font-size: 18px;
-        width: 20px;
-        text-align: center;
+    
+    aside.left-sidebar .sidebar-link i {
+        color: #ffffff !important;
     }
-
-    .sidebar-nav ul .sidebar-item.selected .sidebar-link i,
-    .sidebar-nav ul .sidebar-item .sidebar-link:hover i {
-        color: #ffffff;
+    
+    aside.left-sidebar .sidebar-link:hover {
+        background: #1a1a1a !important;
+        color: #ffffff !important;
     }
-
-    /* Submenu styling */
-    .sidebar-nav ul .first-level {
-        padding-left: 20px;
+    
+    aside.left-sidebar .sidebar-item.selected > .sidebar-link,
+    aside.left-sidebar .sidebar-link.active {
+        background: #2c2c2c !important;
+        border-left: 3px solid #ffffff;
+        color: #ffffff !important;
     }
-
-    .sidebar-nav ul .first-level .sidebar-item .sidebar-link {
-        padding: 10px 15px;
-        font-size: 13px;
+    
+    aside.left-sidebar .nav-small-cap,
+    aside.left-sidebar .nav-small-cap span,
+    aside.left-sidebar .nav-small-cap .hide-menu {
+        color: #ffffff !important;
+        opacity: 0.7;
     }
-
-    /* Badge styling */
-    .badge {
-        background: #10b981;
-        color: #ffffff;
+    
+    aside.left-sidebar .user-profile {
+        background: #000000 !important;
+        border-bottom: 1px solid #1a1a1a;
     }
-
-    /* Scrollbar */
-    .scroll-sidebar::-webkit-scrollbar {
-        width: 6px;
+    
+    aside.left-sidebar .profile-text,
+    aside.left-sidebar .profile-text a,
+    aside.left-sidebar .profile-text span,
+    aside.left-sidebar .user-profile a {
+        color: #ffffff !important;
     }
-
-    .scroll-sidebar::-webkit-scrollbar-track {
-        background: #000000;
-    }
-
-    .scroll-sidebar::-webkit-scrollbar-thumb {
-        background: #1a1a1a;
-        border-radius: 3px;
-    }
-
-    .scroll-sidebar::-webkit-scrollbar-thumb:hover {
-        background: #4a90e2;
-    }
-
-    /* Hide-menu text color */
-    .sidebar-nav .hide-menu {
-        color: #ffffff;
+    
+    /* First level menu */
+    aside.left-sidebar .first-level .sidebar-link {
+        color: #ffffff !important;
     }
 </style>
