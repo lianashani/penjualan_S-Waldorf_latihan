@@ -195,7 +195,8 @@ class SWaldorfSeeder extends Seeder
             'password' => Hash::make('password'),
             'no_hp' => '081234567890',
             'alamat' => 'Jl. Member Test No. 1',
-            'points' => 100,
+            'points' => 850,
+            'total_spent' => 3250000,
             'status' => 'aktif'
         ]);
 

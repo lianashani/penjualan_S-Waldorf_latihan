@@ -26,6 +26,7 @@
                             <tr>
                                 <th width="50">No</th>
                                 <th>Nama Produk</th>
+                                <th>Gambar</th>
                                 <th>Kategori</th>
                                 <th>Barcode</th>
                                 <th>Ukuran</th>
@@ -40,6 +41,15 @@
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td><strong>{{ $produk->nama_produk }}</strong></td>
+                                <td>
+                                    @if($produk->gambar)
+                                        <img src="{{ asset('storage/' . $produk->gambar) }}" alt="{{ $produk->nama_produk }}" style="width:60px;height:60px;object-fit:cover;border-radius:4px;">
+                                    @else
+                                        <div class="text-muted" style="width:60px;height:60px;display:flex;align-items:center;justify-content:center;background:#f5f5f5;border-radius:4px;">
+                                            <i class="mdi mdi-image-off"></i>
+                                        </div>
+                                    @endif
+                                </td>
                                 <td><span class="badge badge-info">{{ $produk->kategori->nama_kategori ?? '-' }}</span></td>
                                 <td>
                                     <code>{{ $produk->barcode }}</code><br>
@@ -84,7 +94,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="9" class="text-center">Belum ada data produk</td>
+                                <td colspan="10" class="text-center">Belum ada data produk</td>
                             </tr>
                             @endforelse
                         </tbody>

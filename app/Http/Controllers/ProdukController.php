@@ -107,7 +107,12 @@ class ProdukController extends Controller
     public function generateBarcode($id)
     {
         $produk = Produk::findOrFail($id);
-        
+        if (empty($produk->barcode)) {
+            $produk->barcode = 'PRD' . str_pad($produk->id_produk, 6, '0', STR_PAD_LEFT);
+            $produk->qr_code = $produk->barcode;
+            $produk->save();
+        }
+
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
         $barcode = $generator->getBarcode($produk->barcode, $generator::TYPE_CODE_128);
         
@@ -118,7 +123,12 @@ class ProdukController extends Controller
     public function generateQRCode($id)
     {
         $produk = Produk::findOrFail($id);
-        
+        if (empty($produk->barcode)) {
+            $produk->barcode = 'PRD' . str_pad($produk->id_produk, 6, '0', STR_PAD_LEFT);
+            $produk->qr_code = $produk->barcode;
+            $produk->save();
+        }
+
         // Use BaconQrCode directly
         $renderer = new \BaconQrCode\Renderer\ImageRenderer(
             new \BaconQrCode\Renderer\RendererStyle\RendererStyle(200),
@@ -141,7 +151,12 @@ class ProdukController extends Controller
     public function downloadBarcode($id)
     {
         $produk = Produk::findOrFail($id);
-        
+        if (empty($produk->barcode)) {
+            $produk->barcode = 'PRD' . str_pad($produk->id_produk, 6, '0', STR_PAD_LEFT);
+            $produk->qr_code = $produk->barcode;
+            $produk->save();
+        }
+
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
         $barcode = $generator->getBarcode($produk->barcode, $generator::TYPE_CODE_128);
         
@@ -155,7 +170,12 @@ class ProdukController extends Controller
     public function downloadQRCode($id)
     {
         $produk = Produk::findOrFail($id);
-        
+        if (empty($produk->barcode)) {
+            $produk->barcode = 'PRD' . str_pad($produk->id_produk, 6, '0', STR_PAD_LEFT);
+            $produk->qr_code = $produk->barcode;
+            $produk->save();
+        }
+
         $renderer = new \BaconQrCode\Renderer\ImageRenderer(
             new \BaconQrCode\Renderer\RendererStyle\RendererStyle(400),
             new \BaconQrCode\Renderer\Image\SvgImageBackEnd()

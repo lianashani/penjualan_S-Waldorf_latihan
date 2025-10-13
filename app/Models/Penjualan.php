@@ -18,7 +18,8 @@ class Penjualan extends Model
         'total_bayar',
         'kembalian',
         'status_transaksi',
-        'tanggal_transaksi'
+        'tanggal_transaksi',
+        'id_member_order'
     ];
 
     protected $casts = [

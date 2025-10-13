@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Member;
 
 use App\Http\Controllers\Controller;
 use App\Models\Member;
+use App\Models\Pelanggan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -30,6 +31,20 @@ class AuthController extends Controller
             'password' => $request->password,
             'status' => 'aktif'
         ], $request->remember)) {
+            $member = Auth::guard('member')->user();
+            if ($member && empty($member->id_pelanggan)) {
+                $pelanggan = Pelanggan::where('email', $member->email)->first();
+                if (!$pelanggan) {
+                    $pelanggan = Pelanggan::create([
+                        'nama_pelanggan' => $member->nama_member,
+                        'email' => $member->email,
+                        'status' => 'aktif',
+                        'tanggal_daftar' => now(),
+                    ]);
+                }
+                $member->id_pelanggan = $pelanggan->id_pelanggan;
+                $member->save();
+            }
             return redirect()->intended(route('member.dashboard'));
         }
 
@@ -59,6 +74,18 @@ class AuthController extends Controller
             'alamat' => $request->alamat,
             'status' => 'aktif'
         ]);
+
+        $pelanggan = Pelanggan::where('email', $member->email)->first();
+        if (!$pelanggan) {
+            $pelanggan = Pelanggan::create([
+                'nama_pelanggan' => $member->nama_member,
+                'email' => $member->email,
+                'status' => 'aktif',
+                'tanggal_daftar' => now(),
+            ]);
+        }
+        $member->id_pelanggan = $pelanggan->id_pelanggan;
+        $member->save();
 
         Auth::guard('member')->login($member);
 

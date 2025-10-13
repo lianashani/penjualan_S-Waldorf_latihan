@@ -6,12 +6,17 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KatalogController;
 use App\Http\Controllers\Member\AuthController as MemberAuthController;
 use App\Http\Controllers\Member\DashboardController as MemberDashboardController;
+use App\Http\Controllers\Member\CatalogController as MemberCatalogController;
+use App\Http\Controllers\Member\CartController as MemberCartController;
 use App\Http\Controllers\Member\OrderController as MemberOrderController;
+use App\Http\Controllers\Admin\MemberOrderController as AdminMemberOrderController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\PromoController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\ProdukController;
+use App\Http\Controllers\PenjualanController;
 
 // Public Landing Page
 Route::get('/welcome', function () {
@@ -36,14 +41,14 @@ Route::middleware('auth')->group(function () {
 
 // Protected Routes (Must Change Password First)
 Route::middleware(['auth', App\Http\Middleware\MustChangePassword::class])->group(function () {
-    
+
     // Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard.index');
 
     // Katalog Produk (Accessible by all authenticated users)
     Route::get('/katalog', [KatalogController::class, 'index'])->name('katalog.index');
     Route::get('/katalog/{id}', [KatalogController::class, 'show'])->name('katalog.show');
-    
+
     // Keranjang (Shopping Cart) - For All
     Route::get('/keranjang', [KatalogController::class, 'viewCart'])->name('keranjang.index');
     Route::get('/keranjang/view', [KatalogController::class, 'viewCart'])->name('keranjang.view');
@@ -56,10 +61,10 @@ Route::middleware(['auth', App\Http\Middleware\MustChangePassword::class])->grou
     Route::middleware([App\Http\Middleware\CheckRole::class . ':admin'])->group(function () {
         // User Management
         Route::resource('user', UserController::class);
-        
+
         // Kategori
         Route::resource('kategori', KategoriController::class);
-        
+
         // Produk
         Route::resource('produk', ProdukController::class);
         Route::get('/produk/{id}/barcode', [ProdukController::class, 'generateBarcode'])->name('produk.barcode');
@@ -68,16 +73,22 @@ Route::middleware(['auth', App\Http\Middleware\MustChangePassword::class])->grou
         Route::get('/produk/{id}/download-barcode', [ProdukController::class, 'downloadBarcode'])->name('produk.download-barcode');
         Route::get('/produk/{id}/download-qrcode', [ProdukController::class, 'downloadQRCode'])->name('produk.download-qrcode');
         Route::post('/produk/{id}/update-stok', [ProdukController::class, 'updateStok'])->name('produk.update-stok');
-        
+
         // Pelanggan
         Route::resource('pelanggan', PelangganController::class);
-        
+
         // Promo
         Route::resource('promo', PromoController::class);
-        
+
         // Laporan
         Route::get('/laporan', [App\Http\Controllers\LaporanController::class, 'index'])->name('laporan.index');
         Route::get('/laporan/print', [App\Http\Controllers\LaporanController::class, 'print'])->name('laporan.print');
+
+        // Member Orders (Queue for Kasir/Admin)
+        Route::get('/member-orders', [AdminMemberOrderController::class, 'index'])->name('admin.member-orders.index');
+        Route::get('/member-orders/{id}', [AdminMemberOrderController::class, 'show'])->name('admin.member-orders.show');
+        Route::post('/member-orders/{id}/status', [AdminMemberOrderController::class, 'updateStatus'])->name('admin.member-orders.update-status');
+        Route::get('/member-orders/{id}/print', [AdminMemberOrderController::class, 'print'])->name('admin.member-orders.print');
     });
 
     // KASIR ONLY Routes
@@ -85,26 +96,56 @@ Route::middleware(['auth', App\Http\Middleware\MustChangePassword::class])->grou
         // Penjualan (Sales Transaction)
         Route::resource('penjualan', PenjualanController::class);
         Route::post('penjualan/calculate-discount', [PenjualanController::class, 'calculateDiscount'])->name('penjualan.calculate-discount');
-        
+
         // Print Receipt
         Route::get('/penjualan/{id}/print', [PenjualanController::class, 'print'])->name('penjualan.print');
-        
+
         // Keranjang (Shopping Cart)
         Route::get('/keranjang', function() {
             return redirect()->route('penjualan.create');
         })->name('keranjang.index');
+
+        // Member Orders Queue (Kasir access)
+        Route::get('/member-orders', [AdminMemberOrderController::class, 'index'])->name('kasir.member-orders.index');
+        Route::get('/member-orders/{id}', [AdminMemberOrderController::class, 'show'])->name('kasir.member-orders.show');
+        Route::post('/member-orders/{id}/status', [AdminMemberOrderController::class, 'updateStatus'])->name('kasir.member-orders.update-status');
+        Route::get('/member-orders/{id}/print', [AdminMemberOrderController::class, 'print'])->name('kasir.member-orders.print');
     });
 
-    
+
 });
 
 // Member Routes
 Route::prefix('member')->name('member.')->group(function () {
     Route::get('/login', [MemberAuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [MemberAuthController::class, 'login']);
-    
+
     Route::middleware('auth:member')->group(function () {
         Route::get('/dashboard', [MemberDashboardController::class, 'index'])->name('dashboard');
         Route::post('/logout', [MemberAuthController::class, 'logout'])->name('logout');
+        // Member Catalog
+        Route::get('/catalog', [MemberCatalogController::class, 'index'])->name('catalog.index');
+        Route::get('/catalog/{id}', [MemberCatalogController::class, 'show'])->name('catalog.show');
+
+        // Member Cart
+        Route::get('/cart', [MemberCartController::class, 'index'])->name('cart.index');
+        Route::post('/cart/add', [MemberCartController::class, 'add'])->name('cart.add');
+        Route::post('/cart/update', [MemberCartController::class, 'update'])->name('cart.update');
+        Route::post('/cart/remove', [MemberCartController::class, 'remove'])->name('cart.remove');
+
+        // Member Orders / Checkout
+        Route::post('/checkout', [MemberOrderController::class, 'checkout'])->name('checkout');
+        Route::get('/orders', [MemberOrderController::class, 'index'])->name('orders');
+        Route::get('/orders/{id}', [MemberOrderController::class, 'show'])->name('orders.show');
+        Route::get('/orders/{id}/track', [MemberOrderController::class, 'track'])->name('orders.track');
+        Route::get('/orders/{id}/receipt', [MemberOrderController::class, 'receipt'])->name('orders.receipt');
+        Route::get('/profile', function() {
+            $member = \Illuminate\Support\Facades\Auth::guard('member')->user();
+            return view('member.profile', compact('member'));
+        })->name('profile');
+        Route::get('/rewards', function() {
+            $member = \Illuminate\Support\Facades\Auth::guard('member')->user();
+            return view('member.redeem', compact('member'));
+        })->name('rewards');
     });
 });

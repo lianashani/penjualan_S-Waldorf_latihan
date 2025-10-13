@@ -19,6 +19,7 @@ class Member extends Authenticatable
         'password',
         'no_hp',
         'alamat',
+        'photo',
         'points',
         'total_spent',
         'status'

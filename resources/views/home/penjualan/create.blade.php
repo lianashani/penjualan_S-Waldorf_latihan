@@ -247,7 +247,8 @@ $(document).ready(function() {
                             @foreach($produks as $produk)
                                 <option value="{{ $produk->id_produk }}" 
                                         data-harga="{{ $produk->harga }}"
-                                        data-stok="{{ $produk->stok }}">
+                                        data-stok="{{ $produk->stok }}"
+                                        data-barcode="{{ $produk->barcode }}">
                                     {{ $produk->nama_produk }} - {{ $produk->kategori->nama_kategori ?? '' }} 
                                     (Stok: {{ $produk->stok }}) - Rp. {{ number_format($produk->harga, 0, ',', '.') }}
                                 </option>
@@ -383,56 +384,47 @@ $(document).ready(function() {
 
     // Function to search and add product by barcode
     function searchProductByBarcode(barcode) {
-        // Find product in select options
         let found = false;
-        
         $('.produk-select option').each(function() {
+            const optionVal = $(this).val();
+            const optionBarcode = $(this).data('barcode');
             const optionText = $(this).text();
-            if (optionText.includes(barcode) || $(this).data('barcode') === barcode) {
-                // Check if product already in cart
+            if (!optionVal) return; 
+            if (optionBarcode === barcode || optionText.includes(barcode)) {
                 let existingRow = null;
                 $('.item-row').each(function() {
-                    if ($(this).find('.produk-select').val() == $(this).val()) {
+                    const selectedVal = $(this).find('.produk-select').val();
+                    if (selectedVal == optionVal) {
                         existingRow = $(this);
                         return false;
                     }
                 });
-
                 if (existingRow) {
-                    // Increment qty
                     const qtyInput = existingRow.find('.qty-input');
-                    qtyInput.val(parseInt(qtyInput.val()) + 1);
-                    qtyInput.trigger('change');
+                    qtyInput.val((parseInt(qtyInput.val()) || 0) + 1).trigger('change');
                 } else {
-                    // Add new row
                     const lastRow = $('.item-row').last();
                     const select = lastRow.find('.produk-select');
-                    
-                    if (select.val() === '') {
-                        // Use existing empty row
-                        select.val($(this).val()).trigger('change');
+                    if (!select.val()) {
+                        select.val(optionVal).trigger('change');
                     } else {
-                        // Add new row
                         $('#addItem').click();
                         setTimeout(() => {
-                            $('.item-row').last().find('.produk-select').val($(this).val()).trigger('change');
+                            $('.item-row').last().find('.produk-select').val(optionVal).trigger('change');
                         }, 100);
                     }
                 }
-                
                 found = true;
                 Swal.fire({
                     icon: 'success',
                     title: 'Produk Ditambahkan!',
-                    text: $(this).text(),
+                    text: optionText,
                     timer: 1500,
                     showConfirmButton: false
                 });
-                
-                return false; // Break loop
+                return false;
             }
         });
-
         if (!found) {
             Swal.fire('Tidak Ditemukan', `Produk dengan barcode "${barcode}" tidak ditemukan!`, 'error');
         }

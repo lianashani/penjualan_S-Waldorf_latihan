@@ -79,7 +79,7 @@
                 <!-- Kategori -->
                 <li class="sidebar-item {{ Request::is('kategori*') ? 'selected' : '' }}">
                     <a class="sidebar-link waves-effect waves-dark" href="{{ route('kategori.index') }}" aria-expanded="false">
-                        <i class="mdi mdi-shape"></i>
+                        <i class="mdi mdi-package"></i>
                         <span class="hide-menu">Kategori</span>
                     </a>
                 </li>
@@ -121,6 +121,19 @@
                     </a>
                 </li>
 
+                <!-- Antrian Order (Admin) -->
+                @if (Route::has('admin.member-orders.index'))
+                @php($pendingCountAdmin = \App\Models\MemberOrder::where('status','awaiting_preparation')->count())
+                <li class="sidebar-item {{ request()->routeIs('admin.member-orders.*') ? 'selected' : '' }}">
+                    <a class="sidebar-link waves-effect waves-dark d-flex justify-content-between align-items-center" href="{{ route('admin.member-orders.index') }}" aria-expanded="false">
+                        <span><i class="mdi mdi-clipboard-list"></i> <span class="hide-menu">Antrian Order</span></span>
+                        @if($pendingCountAdmin > 0)
+                            <span class="badge badge-danger">{{ $pendingCountAdmin }}</span>
+                        @endif
+                    </a>
+                </li>
+                @endif
+
                 <!-- Laporan -->
                 <li class="nav-small-cap">
                     <span class="hide-menu">Laporan</span>
@@ -138,7 +151,9 @@
                 <!-- KASIR MENU -->
                 <li class="nav-small-cap">
                     <span class="hide-menu">Transaksi</span>
+
                 </li>
+
 
                 <!-- Penjualan -->
                 <li class="sidebar-item {{ Request::is('penjualan*') ? 'selected' : '' }}">
@@ -147,6 +162,19 @@
                         <span class="hide-menu">Transaksi Penjualan</span>
                     </a>
                 </li>
+
+                <!-- Antrian Order (Kasir) -->
+                @if (Route::has('kasir.member-orders.index'))
+                @php($pendingCountKasir = \App\Models\MemberOrder::where('status','awaiting_preparation')->count())
+                <li class="sidebar-item {{ request()->routeIs('kasir.member-orders.*') ? 'selected' : '' }}">
+                    <a class="sidebar-link waves-effect waves-dark d-flex justify-content-between align-items-center" href="{{ route('kasir.member-orders.index') }}" aria-expanded="false">
+                        <span><i class="mdi mdi-clipboard"></i> <span class="hide-menu">Antrian Order</span></span>
+                        @if($pendingCountKasir > 0)
+                            <span class="badge badge-danger">{{ $pendingCountKasir }}</span>
+                        @endif
+                    </a>
+                </li>
+                @endif
 
                 <!-- Katalog -->
                 <li class="nav-small-cap">
@@ -190,60 +218,60 @@
     aside.left-sidebar {
         background: #000000 !important;
     }
-    
+
     aside.left-sidebar .scroll-sidebar {
         background: #000000 !important;
     }
-    
+
     aside.left-sidebar .sidebar-nav {
         background: #000000 !important;
     }
-    
+
     aside.left-sidebar .sidebar-nav ul {
         background: #000000 !important;
     }
-    
+
     aside.left-sidebar .sidebar-link,
     aside.left-sidebar .sidebar-link span,
     aside.left-sidebar .hide-menu {
         color: #ffffff !important;
     }
-    
+
     aside.left-sidebar .sidebar-link i {
         color: #ffffff !important;
     }
-    
+
     aside.left-sidebar .sidebar-link:hover {
         background: #1a1a1a !important;
         color: #ffffff !important;
     }
-    
+
     aside.left-sidebar .sidebar-item.selected > .sidebar-link,
     aside.left-sidebar .sidebar-link.active {
         background: #2c2c2c !important;
         border-left: 3px solid #ffffff;
         color: #ffffff !important;
     }
-    
+
     aside.left-sidebar .nav-small-cap,
     aside.left-sidebar .nav-small-cap span,
     aside.left-sidebar .nav-small-cap .hide-menu {
         color: #ffffff !important;
         opacity: 0.7;
     }
-    
+
     aside.left-sidebar .user-profile {
         background: #000000 !important;
         border-bottom: 1px solid #1a1a1a;
     }
-    
+
     aside.left-sidebar .profile-text,
     aside.left-sidebar .profile-text a,
     aside.left-sidebar .profile-text span,
     aside.left-sidebar .user-profile a {
         color: #ffffff !important;
     }
-    
+
     /* First level menu */
     aside.left-sidebar .first-level .sidebar-link {
         color: #ffffff !important;

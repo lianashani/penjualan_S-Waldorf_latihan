@@ -19,8 +19,8 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label>Cari Produk</label>
-                                <input type="text" name="search" class="form-control" 
-                                       placeholder="Cari nama produk..." 
+                                <input type="text" name="search" class="form-control"
+                                       placeholder="Cari nama produk..."
                                        value="{{ request('search') }}">
                             </div>
                         </div>
@@ -30,7 +30,7 @@
                                 <select name="kategori" class="form-control">
                                     <option value="">Semua Kategori</option>
                                     @foreach($kategoris as $kategori)
-                                        <option value="{{ $kategori->id_kategori }}" 
+                                        <option value="{{ $kategori->id_kategori }}"
                                                 {{ request('kategori') == $kategori->id_kategori ? 'selected' : '' }}>
                                             {{ $kategori->nama_kategori }} ({{ $kategori->produks_count }})
                                         </option>
@@ -67,7 +67,7 @@
                         <div class="card product-card h-100">
                             <div class="product-image">
                                 @if($produk->gambar)
-                                    <img src="{{ asset('storage/' . $produk->gambar) }}" 
+                                    <img src="{{ asset('storage/' . $produk->gambar) }}"
                                          class="card-img-top" alt="{{ $produk->nama_produk }}">
                                 @else
                                     <div class="no-image">
@@ -75,34 +75,34 @@
                                         <p>No Image</p>
                                     </div>
                                 @endif
-                                
+
                                 <!-- Stock Badge -->
                                 @if($produk->stok <= 10)
                                     <span class="badge badge-warning stock-badge">Stok Terbatas!</span>
                                 @endif
                             </div>
-                            
+
                             <div class="card-body d-flex flex-column">
                                 <span class="badge badge-info mb-2">{{ $produk->kategori->nama_kategori ?? '-' }}</span>
                                 <h5 class="card-title">{{ $produk->nama_produk }}</h5>
-                                
+
                                 <div class="product-details mb-2">
                                     <small class="text-muted">
-                                        <i class="mdi mdi-ruler"></i> {{ $produk->ukuran }} | 
+                                        <i class="mdi mdi-ruler"></i> {{ $produk->ukuran }} |
                                         <i class="mdi mdi-palette"></i> {{ $produk->warna }}
                                     </small>
                                 </div>
-                                
+
                                 <div class="product-stock mb-2">
                                     <small>
-                                        <i class="mdi mdi-package-variant"></i> 
+                                        <i class="mdi mdi-package-variant"></i>
                                         Stok: <strong>{{ $produk->stok }}</strong>
                                     </small>
                                 </div>
-                                
+
                                 <div class="mt-auto">
                                     <h4 class="text-primary mb-3">Rp. {{ number_format($produk->harga, 0, ',', '.') }}</h4>
-                                    
+
                                     @if(Auth::user()->role == 'kasir')
                                     <!-- Add to Cart Button for Kasir -->
                                     <form action="{{ route('keranjang.add') }}" method="POST" class="mb-2">
@@ -114,8 +114,8 @@
                                         </button>
                                     </form>
                                     @endif
-                                    
-                                    <a href="{{ route('katalog.show', $produk->id_produk) }}" 
+
+                                    <a href="{{ route('katalog.show', $produk->id_produk) }}"
                                        class="btn btn-outline-primary btn-block">
                                         <i class="mdi mdi-eye"></i> Lihat Detail
                                     </a>
@@ -126,7 +126,7 @@
                     @empty
                     <div class="col-12">
                         <div class="alert alert-info text-center">
-                            <i class="mdi mdi-information"></i> 
+                            <i class="mdi mdi-information"></i>
                             Tidak ada produk yang ditemukan. Silakan coba filter lain.
                         </div>
                     </div>
@@ -134,9 +134,9 @@
                 </div>
 
                 <!-- Pagination -->
-                <div class="mt-4">
+                {{-- <div class="mt-4">
                     {{ $produks->appends(request()->query())->links() }}
-                </div>
+                </div> --}}
             </div>
         </div>
     </div>
