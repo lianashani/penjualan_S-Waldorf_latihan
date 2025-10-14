@@ -13,6 +13,8 @@ class DetailPenjualan extends Model
     protected $fillable = [
         'id_penjualan',
         'id_produk',
+        'ukuran',
+        'warna',
         'qty',
         'harga_satuan',
         'subtotal'

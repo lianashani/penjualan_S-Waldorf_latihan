@@ -111,6 +111,7 @@
                                     <tr>
                                         <th>No</th>
                                         <th>Nama Produk</th>
+                                        <th>Varian</th>
                                         <th>Kategori</th>
                                         <th>Harga Satuan</th>
                                         <th>Qty</th>
@@ -122,6 +123,13 @@
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $detail->produk->nama_produk ?? '-' }}</td>
+                                        <td>
+                                            @if($detail->ukuran || $detail->warna)
+                                                Ukuran: {{ $detail->ukuran ?? '-' }}, Warna: {{ $detail->warna ?? '-' }}
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
                                         <td>{{ $detail->produk->kategori->nama_kategori ?? '-' }}</td>
                                         <td>Rp. {{ number_format($detail->harga_satuan, 0, ',', '.') }}</td>
                                         <td>{{ $detail->qty }}</td>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Produk;
 use App\Models\Kategori;
+use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 
 class KatalogController extends Controller
@@ -61,14 +62,82 @@ class KatalogController extends Controller
     public function addToCart(Request $request)
     {
         $produk = Produk::findOrFail($request->id_produk);
-        $qty = $request->qty ?? 1;
+        $qty = max(1, (int)($request->qty ?? 1));
 
+        $cart = session()->get('keranjang', []);
+
+        // If variant specified (ukuran/warna), find matching variant
+        $ukuran = $request->input('ukuran');
+        $warna = $request->input('warna');
+
+        if ($ukuran || $warna) {
+            $variant = ProductVariant::where('id_produk', $produk->id_produk)
+                ->when($ukuran, fn($q) => $q->where('ukuran', $ukuran))
+                ->when($warna, fn($q) => $q->where('warna', $warna))
+                ->where('is_active', true)
+                ->first();
+
+            if (!$variant) {
+                // Create variant on the fly if not exists
+                $colorCodes = [
+                    'Hitam' => '#000000',
+                    'Putih' => '#FFFFFF',
+                    'Merah' => '#DC2626',
+                    'Biru' => '#2563EB',
+                    'Hijau' => '#16A34A',
+                    'Biru Tua' => '#1E3A8A',
+                    'Abu-abu' => '#6B7280',
+                    'Coklat' => '#92400E',
+                    'Pink' => '#EC4899',
+                    'Kuning' => '#EAB308'
+                ];
+
+                $variant = ProductVariant::create([
+                    'id_produk' => $produk->id_produk,
+                    'ukuran' => $ukuran ?? '-',
+                    'warna' => $warna ?? '-',
+                    'kode_warna' => $colorCodes[$warna] ?? '#CCCCCC',
+                    'stok' => 10,
+                    'harga' => $produk->harga,
+                    'is_active' => true,
+                ]);
+            }
+
+            if ($variant->stok < $qty) {
+                return back()->with('error', 'Stok varian tidak mencukupi!');
+            }
+
+            // Use a composite key so different variants of the same product can coexist
+            $key = $produk->id_produk . '|' . ($variant->id_variant ?? ($ukuran.'-'.$warna));
+
+            if (isset($cart[$key])) {
+                $cart[$key]['qty'] += $qty;
+            } else {
+                $cart[$key] = [
+                    'id_produk' => $produk->id_produk,
+                    'nama_produk' => $produk->nama_produk,
+                    'harga' => $variant->harga ?? $produk->harga,
+                    'qty' => $qty,
+                    'gambar' => $produk->gambar,
+                    'barcode' => $produk->barcode,
+                    'variant' => [
+                        'id' => $variant->id_variant ?? null,
+                        'ukuran' => $variant->ukuran ?? $ukuran,
+                        'warna' => $variant->warna ?? $warna,
+                        'sku' => $variant->sku ?? null,
+                    ],
+                ];
+            }
+
+            session()->put('keranjang', $cart);
+            return back()->with('success', 'Produk varian ditambahkan ke keranjang!');
+        }
+
+        // Non-variant path
         if ($produk->stok < $qty) {
             return back()->with('error', 'Stok tidak mencukupi!');
         }
 
-        $cart = session()->get('keranjang', []);
-        
         if (isset($cart[$produk->id_produk])) {
             $cart[$produk->id_produk]['qty'] += $qty;
         } else {
@@ -100,9 +169,19 @@ class KatalogController extends Controller
     public function updateCart(Request $request)
     {
         $cart = session()->get('keranjang', []);
-        
-        if (isset($cart[$request->id_produk])) {
-            $cart[$request->id_produk]['qty'] = $request->qty;
+        $key = $request->input('key');
+        $qty = max(1, (int)$request->input('qty'));
+
+        if ($key && isset($cart[$key])) {
+            $cart[$key]['qty'] = $qty;
+            session()->put('keranjang', $cart);
+            return back()->with('success', 'Keranjang diupdate!');
+        }
+
+        // Fallback legacy by id_produk
+        $idProduk = $request->input('id_produk');
+        if ($idProduk && isset($cart[$idProduk])) {
+            $cart[$idProduk]['qty'] = $qty;
             session()->put('keranjang', $cart);
         }
 
@@ -112,9 +191,18 @@ class KatalogController extends Controller
     public function removeFromCart(Request $request)
     {
         $cart = session()->get('keranjang', []);
-        
-        if (isset($cart[$request->id_produk])) {
-            unset($cart[$request->id_produk]);
+
+        $key = $request->input('key');
+        if ($key && isset($cart[$key])) {
+            unset($cart[$key]);
+            session()->put('keranjang', $cart);
+            return back()->with('success', 'Produk dihapus dari keranjang!');
+        }
+
+        // Fallback legacy by id_produk
+        $idProduk = $request->input('id_produk');
+        if ($idProduk && isset($cart[$idProduk])) {
+            unset($cart[$idProduk]);
             session()->put('keranjang', $cart);
         }
 

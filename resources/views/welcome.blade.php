@@ -431,6 +431,14 @@
                             <div class="product-category">{{ $produk->kategori->nama_kategori ?? 'Fashion' }}</div>
                             <h5 class="product-title">{{ $produk->nama_produk }}</h5>
                             <div class="product-price">Rp {{ number_format($produk->harga, 0, ',', '.') }}</div>
+                            <div class="mt-3 d-grid gap-2">
+                                @if(isset($produk->slug) && $produk->slug)
+                                    <a href="{{ route('katalog.elegant-detail', $produk->slug) }}" class="btn btn-outline-dark btn-sm">Lihat Detail</a>
+                                @else
+                                    <a href="{{ route('katalog.elegant') }}" class="btn btn-outline-dark btn-sm">Lihat Detail</a>
+                                @endif
+                                <a href="{{ route('login') }}" class="btn btn-dark btn-sm">Beli</a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -463,6 +471,14 @@
                             <h5 class="product-title">{{ $produk->nama_produk }}</h5>
                             <p class="text-muted" style="font-size: 14px;">{{ $produk->ukuran }} | {{ $produk->warna }}</p>
                             <div class="product-price">Rp {{ number_format($produk->harga, 0, ',', '.') }}</div>
+                            <div class="mt-3 d-grid gap-2">
+                                @if(isset($produk->slug) && $produk->slug)
+                                    <a href="{{ route('katalog.elegant-detail', $produk->slug) }}" class="btn btn-outline-dark btn-sm">Lihat Detail</a>
+                                @else
+                                    <a href="{{ route('katalog.elegant') }}" class="btn btn-outline-dark btn-sm">Lihat Detail</a>
+                                @endif
+                                <a href="{{ route('login') }}" class="btn btn-dark btn-sm">Login untuk membeli</a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -502,6 +518,14 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="product-price">Rp {{ number_format($produk->harga, 0, ',', '.') }}</div>
                                 <small class="text-muted">Stock: {{ $produk->stok }}</small>
+                            </div>
+                            <div class="mt-3 d-grid gap-2">
+                                @if(isset($produk->slug) && $produk->slug)
+                                    <a href="{{ route('katalog.elegant-detail', $produk->slug) }}" class="btn btn-outline-dark btn-sm">Lihat Detail</a>
+                                @else
+                                    <a href="{{ route('katalog.elegant') }}" class="btn btn-outline-dark btn-sm">Lihat Detail</a>
+                                @endif
+                                <a href="{{ route('login') }}" class="btn btn-dark btn-sm">Login untuk membeli</a>
                             </div>
                         </div>
                     </div>

@@ -37,7 +37,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($cart as $item)
+                            @foreach($cart as $key => $item)
                             <tr>
                                 <td>
                                     @if($item['gambar'])
@@ -52,13 +52,16 @@
                                 </td>
                                 <td>
                                     <strong>{{ $item['nama_produk'] }}</strong><br>
+                                    @if(isset($item['variant']))
+                                        <small class="text-muted">Ukuran: {{ $item['variant']['ukuran'] ?? '-' }}, Warna: {{ $item['variant']['warna'] ?? '-' }}</small><br>
+                                    @endif
                                     <small class="text-muted">Barcode: {{ $item['barcode'] }}</small>
                                 </td>
                                 <td>Rp {{ number_format($item['harga'], 0, ',', '.') }}</td>
                                 <td>
                                     <form action="{{ route('keranjang.update') }}" method="POST" class="d-inline">
                                         @csrf
-                                        <input type="hidden" name="id_produk" value="{{ $item['id_produk'] }}">
+                                        <input type="hidden" name="key" value="{{ $key }}">
                                         <div class="input-group input-group-sm">
                                             <input type="number" name="qty" value="{{ $item['qty'] }}" 
                                                    min="1" class="form-control" style="width: 60px;">
@@ -76,7 +79,7 @@
                                 <td>
                                     <form action="{{ route('keranjang.remove') }}" method="POST">
                                         @csrf
-                                        <input type="hidden" name="id_produk" value="{{ $item['id_produk'] }}">
+                                        <input type="hidden" name="key" value="{{ $key }}">
                                         <button type="submit" class="btn btn-danger btn-sm" 
                                                 onclick="return confirm('Hapus produk ini?')">
                                             <i class="mdi mdi-delete"></i>

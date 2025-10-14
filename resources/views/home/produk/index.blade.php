@@ -15,9 +15,14 @@
                         <h4 class="card-title">Data Produk</h4>
                         <h6 class="card-subtitle">Kelola produk S&Waldorf</h6>
                     </div>
-                    <a href="{{ route('produk.create') }}" class="btn btn-primary">
-                        <i class="mdi mdi-plus"></i> Tambah Produk
-                    </a>
+                    <div class="d-flex gap-2">
+                        <a href="{{ route('katalog.elegant') }}" class="btn btn-outline-primary">
+                            <i class="mdi mdi-store"></i> Katalog Elegan
+                        </a>
+                        <a href="{{ route('produk.create') }}" class="btn btn-primary">
+                            <i class="mdi mdi-plus"></i> Tambah Produk
+                        </a>
+                    </div>
                 </div>
 
                 <div class="table-responsive">
@@ -29,10 +34,11 @@
                                 <th>Gambar</th>
                                 <th>Kategori</th>
                                 <th>Barcode</th>
-                                <th>Ukuran</th>
-                                <th>Warna</th>
+                                <th>Varian</th>
                                 <th>Stok</th>
                                 <th>Harga</th>
+                                <th>Rating</th>
+                                <th>Status</th>
                                 <th width="200">Aksi</th>
                             </tr>
                         </thead>
@@ -40,10 +46,18 @@
                             @forelse($produks as $produk)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
-                                <td><strong>{{ $produk->nama_produk }}</strong></td>
                                 <td>
-                                    @if($produk->gambar)
-                                        <img src="{{ asset('storage/' . $produk->gambar) }}" alt="{{ $produk->nama_produk }}" style="width:60px;height:60px;object-fit:cover;border-radius:4px;">
+                                    <strong>{{ $produk->nama_produk }}</strong>
+                                    @if($produk->is_featured)
+                                        <br><span class="badge badge-warning badge-sm">Featured</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($produk->main_image)
+                                        <img src="{{ $produk->main_image }}" alt="{{ $produk->nama_produk }}" style="width:60px;height:60px;object-fit:cover;border-radius:4px;">
+                                        @if($produk->images->count() > 1)
+                                            <br><small class="text-muted">{{ $produk->images->count() }} gambar</small>
+                                        @endif
                                     @else
                                         <div class="text-muted" style="width:60px;height:60px;display:flex;align-items:center;justify-content:center;background:#f5f5f5;border-radius:4px;">
                                             <i class="mdi mdi-image-off"></i>
@@ -57,32 +71,75 @@
                                         <i class="mdi mdi-barcode"></i> Preview
                                     </button>
                                 </td>
-                                <td>{{ $produk->ukuran }}</td>
-                                <td>{{ $produk->warna }}</td>
                                 <td>
-                                    @if($produk->stok <= 0)
-                                        <span class="badge badge-danger">{{ $produk->stok }}</span>
-                                    @elseif($produk->stok <= 10)
-                                        <span class="badge badge-warning">{{ $produk->stok }}</span>
+                                    @if($produk->has_variants)
+                                        <div class="text-center">
+                                            <span class="badge badge-primary">{{ $produk->variants->count() }} varian</span>
+                                            <br>
+                                            <small class="text-muted">
+                                                {{ $produk->variants->pluck('ukuran')->unique()->count() }} ukuran<br>
+                                                {{ $produk->variants->pluck('warna')->unique()->count() }} warna
+                                            </small>
+                                        </div>
                                     @else
-                                        <span class="badge badge-success">{{ $produk->stok }}</span>
+                                        <div>
+                                            <strong>Ukuran:</strong> {{ $produk->ukuran }}<br>
+                                            <strong>Warna:</strong> {{ $produk->warna }}
+                                        </div>
                                     @endif
                                 </td>
-                                <td>Rp. {{ number_format($produk->harga, 0, ',', '.') }}</td>
+                                <td>
+                                    @if($produk->has_variants)
+                                        <span class="badge badge-{{ $produk->total_stok <= 0 ? 'danger' : ($produk->total_stok <= 10 ? 'warning' : 'success') }}">
+                                            {{ $produk->total_stok }}
+                                        </span>
+                                    @else
+                                        <span class="badge badge-{{ $produk->stok <= 0 ? 'danger' : ($produk->stok <= 10 ? 'warning' : 'success') }}">
+                                            {{ $produk->stok }}
+                                        </span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($produk->has_variants)
+                                        <div class="text-center">
+                                            <strong>{{ $produk->formatted_price }}</strong>
+                                            <br><small class="text-muted">Bervariasi</small>
+                                        </div>
+                                    @else
+                                        <strong>Rp. {{ number_format($produk->harga, 0, ',', '.') }}</strong>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($produk->rating_count > 0)
+                                        <div class="text-center">
+                                            <span class="text-warning">{!! $produk->rating_stars !!}</span>
+                                            <br><small class="text-muted">({{ $produk->rating_count }})</small>
+                                        </div>
+                                    @else
+                                        <span class="text-muted">Belum ada rating</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($produk->is_active)
+                                        <span class="badge badge-success">Aktif</span>
+                                    @else
+                                        <span class="badge badge-secondary">Nonaktif</span>
+                                    @endif
+                                </td>
                                 <td>
                                     <button class="btn btn-sm btn-info" onclick="updateStok({{ $produk->id_produk }}, '{{ $produk->nama_produk }}', {{ $produk->stok }})" title="Update Stok">
                                         <i class="mdi mdi-package-variant-closed"></i>
                                     </button>
-                                    <a href="{{ route('produk.edit', $produk->id_produk) }}" 
+                                    <a href="{{ route('produk.edit', $produk->id_produk) }}"
                                        class="btn btn-sm btn-warning" title="Edit">
                                         <i class="mdi mdi-pencil"></i>
                                     </a>
-                                    <a href="{{ route('produk.print-barcode', $produk->id_produk) }}" 
+                                    <a href="{{ route('produk.print-barcode', $produk->id_produk) }}"
                                        class="btn btn-sm btn-success" title="Print Barcode" target="_blank">
                                         <i class="mdi mdi-printer"></i>
                                     </a>
-                                    <form action="{{ route('produk.destroy', $produk->id_produk) }}" 
-                                          method="POST" class="d-inline" 
+                                    <form action="{{ route('produk.destroy', $produk->id_produk) }}"
+                                          method="POST" class="d-inline"
                                           onsubmit="return confirm('Yakin hapus produk ini?')">
                                         @csrf
                                         @method('DELETE')
@@ -94,7 +151,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="10" class="text-center">Belum ada data produk</td>
+                                <td colspan="11" class="text-center">Belum ada data produk</td>
                             </tr>
                             @endforelse
                         </tbody>
@@ -130,7 +187,7 @@ function showBarcode(id, nama) {
                         <i class="mdi mdi-download"></i> Download Barcode
                     </a>
                 </div>
-                
+
                 <h5>QR Code</h5>
                 <img src="{{ url('/produk') }}/${id}/qrcode" alt="QR Code" class="img-fluid mb-3" style="max-width: 200px;">
                 <div class="mb-3">
@@ -138,7 +195,7 @@ function showBarcode(id, nama) {
                         <i class="mdi mdi-download"></i> Download QR Code
                     </a>
                 </div>
-                
+
                 <a href="{{ url('/produk') }}/${id}/print-barcode" target="_blank" class="btn btn-success">
                     <i class="mdi mdi-printer"></i> Print Label
                 </a>
@@ -179,12 +236,12 @@ function updateStok(id, nama, currentStok) {
         preConfirm: () => {
             const action = document.getElementById('action').value;
             const jumlah = document.getElementById('jumlah').value;
-            
+
             if (!jumlah || jumlah < 1) {
                 Swal.showValidationMessage('Jumlah harus lebih dari 0');
                 return false;
             }
-            
+
             return { action: action, jumlah: jumlah };
         }
     }).then((result) => {
@@ -193,25 +250,25 @@ function updateStok(id, nama, currentStok) {
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = '{{ url('/produk') }}/' + id + '/update-stok';
-            
+
             const csrf = document.createElement('input');
             csrf.type = 'hidden';
             csrf.name = '_token';
             csrf.value = '{{ csrf_token() }}';
             form.appendChild(csrf);
-            
+
             const actionInput = document.createElement('input');
             actionInput.type = 'hidden';
             actionInput.name = 'action';
             actionInput.value = result.value.action;
             form.appendChild(actionInput);
-            
+
             const jumlahInput = document.createElement('input');
             jumlahInput.type = 'hidden';
             jumlahInput.name = 'jumlah';
             jumlahInput.value = result.value.jumlah;
             form.appendChild(jumlahInput);
-            
+
             document.body.appendChild(form);
             form.submit();
         }

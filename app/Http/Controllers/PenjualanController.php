@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Penjualan;
 use App\Models\DetailPenjualan;
 use App\Models\Produk;
+use App\Models\ProductVariant;
 use App\Models\Pelanggan;
 use App\Models\Promo;
 use Illuminate\Http\Request;
@@ -65,13 +66,32 @@ class PenjualanController extends Controller
             
             foreach ($items as $item) {
                 $produk = Produk::findOrFail($item['id_produk']);
-                
-                // Check stock availability
-                if ($produk->stok < $item['qty']) {
-                    throw new \Exception("Stok produk {$produk->nama_produk} tidak mencukupi. Tersedia: {$produk->stok}");
+
+                // Determine if item refers to a variant
+                $variant = null;
+                if (!empty($item['ukuran']) || !empty($item['warna'])) {
+                    $variant = ProductVariant::where('id_produk', $produk->id_produk)
+                        ->when(!empty($item['ukuran']), fn($q) => $q->where('ukuran', $item['ukuran']))
+                        ->when(!empty($item['warna']), fn($q) => $q->where('warna', $item['warna']))
+                        ->where('is_active', true)
+                        ->first();
                 }
-                
-                $subtotal += $produk->harga * $item['qty'];
+
+                if ($variant) {
+                    // Check variant stock
+                    if ($variant->stok < $item['qty']) {
+                        throw new \Exception("Stok varian ({$variant->ukuran}/{$variant->warna}) untuk {$produk->nama_produk} tidak mencukupi. Tersedia: {$variant->stok}");
+                    }
+                    $hargaSatuan = $variant->harga ?? $produk->harga;
+                } else {
+                    // Non-variant path: check product stock
+                    if ($produk->stok < $item['qty']) {
+                        throw new \Exception("Stok produk {$produk->nama_produk} tidak mencukupi. Tersedia: {$produk->stok}");
+                    }
+                    $hargaSatuan = $produk->harga;
+                }
+
+                $subtotal += $hargaSatuan * $item['qty'];
             }
 
             // Apply discount if promo exists
@@ -118,17 +138,40 @@ class PenjualanController extends Controller
             // Create detail penjualan and update stock
             foreach ($items as $item) {
                 $produk = Produk::findOrFail($item['id_produk']);
-                
+
+                // Resolve variant if provided
+                $variant = null;
+                if (!empty($item['ukuran']) || !empty($item['warna'])) {
+                    $variant = ProductVariant::where('id_produk', $produk->id_produk)
+                        ->when(!empty($item['ukuran']), fn($q) => $q->where('ukuran', $item['ukuran']))
+                        ->when(!empty($item['warna']), fn($q) => $q->where('warna', $item['warna']))
+                        ->where('is_active', true)
+                        ->first();
+                }
+
+                $hargaSatuan = $variant->harga ?? $produk->harga;
+
                 DetailPenjualan::create([
                     'id_penjualan' => $penjualan->id_penjualan,
                     'id_produk' => $item['id_produk'],
+                    'ukuran' => $item['ukuran'] ?? null,
+                    'warna' => $item['warna'] ?? null,
                     'qty' => $item['qty'],
-                    'harga_satuan' => $produk->harga,
-                    'subtotal' => $produk->harga * $item['qty'],
+                    'harga_satuan' => $hargaSatuan,
+                    'subtotal' => $hargaSatuan * $item['qty'],
                 ]);
 
-                // Update product stock
-                $produk->decrement('stok', $item['qty']);
+                // Update stock: variant first, else product
+                if ($variant) {
+                    $variant->decrement('stok', $item['qty']);
+                    // Optionally refresh product totals if needed
+                    if (method_exists($variant, 'updateProductTotals')) {
+                        $variant->refresh();
+                        $variant->updateProductTotals();
+                    }
+                } else {
+                    $produk->decrement('stok', $item['qty']);
+                }
             }
 
             DB::commit();

@@ -121,6 +121,14 @@
                     </a>
                 </li>
 
+                <!-- Katalog Elegan -->
+                <li class="sidebar-item {{ Request::is('katalog-elegant*') ? 'selected' : '' }}">
+                    <a class="sidebar-link waves-effect waves-dark" href="{{ route('katalog.elegant') }}" aria-expanded="false">
+                        <i class="mdi mdi-store"></i>
+                        <span class="hide-menu">Katalog Elegan</span>
+                    </a>
+                </li>
+
                 <!-- Antrian Order (Admin) -->
                 @if (Route::has('admin.member-orders.index'))
                 @php($pendingCountAdmin = \App\Models\MemberOrder::where('status','awaiting_preparation')->count())
@@ -144,6 +152,14 @@
                     <a class="sidebar-link waves-effect waves-dark" href="{{ route('laporan.index') }}" aria-expanded="false">
                         <i class="mdi mdi-file-chart"></i>
                         <span class="hide-menu">Laporan Penjualan</span>
+                    </a>
+                </li>
+
+                <!-- Rating Management -->
+                <li class="sidebar-item {{ Request::is('admin/ratings*') ? 'selected' : '' }}">
+                    <a class="sidebar-link waves-effect waves-dark" href="{{ route('ratings.index') }}" aria-expanded="false">
+                        <i class="mdi mdi-star"></i>
+                        <span class="hide-menu">Kelola Rating</span>
                     </a>
                 </li>
 
@@ -186,6 +202,14 @@
                     <a class="sidebar-link waves-effect waves-dark" href="{{ route('katalog.index') }}" aria-expanded="false">
                         <i class="mdi mdi-view-grid"></i>
                         <span class="hide-menu">Katalog Produk</span>
+                    </a>
+                </li>
+
+                <!-- Katalog Elegan -->
+                <li class="sidebar-item {{ Request::is('katalog-elegant*') ? 'selected' : '' }}">
+                    <a class="sidebar-link waves-effect waves-dark" href="{{ route('katalog.elegant') }}" aria-expanded="false">
+                        <i class="mdi mdi-store"></i>
+                        <span class="hide-menu">Katalog Elegan</span>
                     </a>
                 </li>
                 @endif

@@ -17,6 +17,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\PenjualanController;
+use App\Http\Controllers\ProductRatingController;
 
 // Public Landing Page
 Route::get('/welcome', function () {
@@ -48,6 +49,12 @@ Route::middleware(['auth', App\Http\Middleware\MustChangePassword::class])->grou
     // Katalog Produk (Accessible by all authenticated users)
     Route::get('/katalog', [KatalogController::class, 'index'])->name('katalog.index');
     Route::get('/katalog/{id}', [KatalogController::class, 'show'])->name('katalog.show');
+
+    // Elegant Catalog with Variants
+    Route::get('/katalog-elegant', [ProdukController::class, 'catalog'])->name('katalog.elegant');
+    Route::get('/katalog-elegant/{slug}', [ProdukController::class, 'catalogDetail'])->name('katalog.elegant-detail');
+    Route::post('/katalog-elegant/variant-images', [ProdukController::class, 'getVariantImages'])->name('katalog.variant-images');
+    Route::post('/katalog-elegant/{id}/rating', [ProdukController::class, 'addRating'])->name('katalog.add-rating');
 
     // Keranjang (Shopping Cart) - For All
     Route::get('/keranjang', [KatalogController::class, 'viewCart'])->name('keranjang.index');
@@ -83,6 +90,14 @@ Route::middleware(['auth', App\Http\Middleware\MustChangePassword::class])->grou
         // Laporan
         Route::get('/laporan', [App\Http\Controllers\LaporanController::class, 'index'])->name('laporan.index');
         Route::get('/laporan/print', [App\Http\Controllers\LaporanController::class, 'print'])->name('laporan.print');
+
+        // Rating Management
+        Route::get('/admin/ratings', [ProductRatingController::class, 'index'])->name('ratings.index');
+        Route::get('/admin/ratings/{id}', [ProductRatingController::class, 'show'])->name('ratings.show');
+        Route::post('/admin/ratings/{id}/approve', [ProductRatingController::class, 'approve'])->name('ratings.approve');
+        Route::post('/admin/ratings/{id}/reject', [ProductRatingController::class, 'reject'])->name('ratings.reject');
+        Route::delete('/admin/ratings/{id}', [ProductRatingController::class, 'destroy'])->name('ratings.destroy');
+        Route::post('/admin/ratings/bulk-action', [ProductRatingController::class, 'bulkAction'])->name('ratings.bulk-action');
 
         // Member Orders (Queue for Kasir/Admin)
         Route::get('/member-orders', [AdminMemberOrderController::class, 'index'])->name('admin.member-orders.index');
@@ -126,6 +141,8 @@ Route::prefix('member')->name('member.')->group(function () {
         // Member Catalog
         Route::get('/catalog', [MemberCatalogController::class, 'index'])->name('catalog.index');
         Route::get('/catalog/{id}', [MemberCatalogController::class, 'show'])->name('catalog.show');
+
+        // Member elegant catalog removed; use member.catalog.* within member sidebar
 
         // Member Cart
         Route::get('/cart', [MemberCartController::class, 'index'])->name('cart.index');

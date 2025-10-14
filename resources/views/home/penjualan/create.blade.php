@@ -218,6 +218,13 @@ $(document).ready(function() {
                                 <i class="mdi mdi-delete"></i> Hapus
                             </button>
                         </div>
+                        @if(isset($item['variant']))
+                        <div class="col-12">
+                            <small class="text-muted">Varian: Ukuran {{ $item['variant']['ukuran'] ?? '-' }}, Warna {{ $item['variant']['warna'] ?? '-' }}</small>
+                            <input type="hidden" name="items[{{ $index }}][ukuran]" value="{{ $item['variant']['ukuran'] ?? '' }}">
+                            <input type="hidden" name="items[{{ $index }}][warna]" value="{{ $item['variant']['warna'] ?? '' }}">
+                        </div>
+                        @endif
                     </div>
                 </div>
             `);
