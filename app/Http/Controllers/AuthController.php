@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
 class AuthController extends Controller
 {
@@ -17,13 +18,14 @@ class AuthController extends Controller
     {
         $request->validate([
             'nama_user' => 'required|string|max:100',
-            'email' => 'required|email|unique:users,email,' . auth()->id() . ',id_user'
+            'email' => 'required|email|unique:users,email,' . Auth::id() . ',id_user'
         ]);
 
-        auth()->user()->update([
-            'nama_user' => $request->nama_user,
-            'email' => $request->email
-        ]);
+        /** @var User $user */
+        $user = Auth::user();
+        $user->nama_user = $request->nama_user;
+        $user->email = $request->email;
+        $user->save();
 
         return redirect()->route('profile')
             ->with('success', 'Profil berhasil diupdate!');
@@ -41,16 +43,18 @@ class AuthController extends Controller
             'new_password' => 'required|min:6|confirmed'
         ]);
 
+        /** @var User $user */
+        $user = Auth::user();
+
         // Check current password
-        if (!Hash::check($request->current_password, auth()->user()->password)) {
+        if (!Hash::check($request->current_password, $user->password)) {
             return back()->withErrors(['current_password' => 'Password lama tidak sesuai!']);
         }
 
         // Update password
-        auth()->user()->update([
-            'password' => Hash::make($request->new_password),
-            'must_change_password' => false
-        ]);
+        $user->password = Hash::make($request->new_password);
+        $user->must_change_password = false;
+        $user->save();
 
         return redirect()->route('dashboard.index')
             ->with('success', 'Password berhasil diubah!');

@@ -16,7 +16,7 @@
                     <div class="row align-items-center">
                         <div class="col-md-8">
                             <h2 class="mb-2 text-white">
-                                <i class="mdi mdi-store me-2"></i>Katalog Elegan S&Waldorf
+                                <i class="mdi mdi-store me-2"></i>Katalog S&Waldorf
                             </h2>
                             <p class="mb-0 opacity-75">Temukan koleksi fashion terbaik dengan varian lengkap dan kualitas premium</p>
                             @if(Auth::user()->role == 'admin')

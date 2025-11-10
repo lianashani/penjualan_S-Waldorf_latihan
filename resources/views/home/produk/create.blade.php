@@ -442,25 +442,78 @@ $(document).ready(function() {
         imageUpload[0].files = dt.files;
     }
 
-    // Form validation
+    // Form validation and submit
     $('#productForm').submit(function(e) {
+        e.preventDefault(); // Prevent default submit
+
         const hasVariants = $('input[name="has_variants"]:checked').val();
 
         if (hasVariants == '1') {
             const variantCount = $('.variant-item').length;
             if (variantCount === 0) {
-                e.preventDefault();
                 Swal.fire('Error', 'Minimal harus ada 1 varian untuk produk dengan varian!', 'error');
                 return false;
             }
         }
 
-        // Validate images
-        if (selectedImages.length === 0) {
-            e.preventDefault();
-            Swal.fire('Error', 'Minimal harus ada 1 gambar untuk produk!', 'error');
-            return false;
-        }
+        // Create FormData from form
+        const formData = new FormData(this);
+
+        // Remove old images[] fields
+        formData.delete('images[]');
+
+        // Add images from selectedImages array
+        selectedImages.forEach((imageData, index) => {
+            formData.append('images[]', imageData.file);
+        });
+
+        // Show loading
+        Swal.fire({
+            title: 'Menyimpan...',
+            text: 'Mohon tunggu',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        // Submit via AJAX
+        $.ajax({
+            url: $(this).attr('action'),
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: 'Produk berhasil ditambahkan',
+                    timer: 2000
+                }).then(() => {
+                    window.location.href = '{{ route("produk.index") }}';
+                });
+            },
+            error: function(xhr) {
+                Swal.close();
+                let errorMsg = 'Terjadi kesalahan saat menyimpan produk';
+
+                if (xhr.responseJSON && xhr.responseJSON.errors) {
+                    const errors = xhr.responseJSON.errors;
+                    errorMsg = Object.values(errors).flat().join('<br>');
+                } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMsg = xhr.responseJSON.message;
+                }
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    html: errorMsg
+                });
+            }
+        });
+
+        return false;
     });
 
     // Add initial variant if variant product is selected

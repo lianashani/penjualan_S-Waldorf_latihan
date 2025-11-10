@@ -2,7 +2,7 @@
 @section('title', $produk->nama_produk)
 
 @section('breadcrumb')
-<li class="breadcrumb-item"><a href="{{ route('katalog.elegant') }}">Katalog Elegan</a></li>
+<li class="breadcrumb-item"><a href="{{ route('katalog.elegant') }}">Katalog</a></li>
 <li class="breadcrumb-item"><a href="#">{{ $produk->kategori->nama_kategori }}</a></li>
 <li class="breadcrumb-item active" aria-current="page">{{ $produk->nama_produk }}</li>
 @endsection

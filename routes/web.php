@@ -8,7 +8,9 @@ use App\Http\Controllers\Member\AuthController as MemberAuthController;
 use App\Http\Controllers\Member\DashboardController as MemberDashboardController;
 use App\Http\Controllers\Member\CatalogController as MemberCatalogController;
 use App\Http\Controllers\Member\CartController as MemberCartController;
+use App\Http\Controllers\Member\ChatController as MemberChatController;
 use App\Http\Controllers\Member\OrderController as MemberOrderController;
+use App\Http\Controllers\Member\PaymentController as MemberPaymentController;
 use App\Http\Controllers\Admin\MemberOrderController as AdminMemberOrderController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\PelangganController;
@@ -80,6 +82,7 @@ Route::middleware(['auth', App\Http\Middleware\MustChangePassword::class])->grou
         Route::get('/produk/{id}/download-barcode', [ProdukController::class, 'downloadBarcode'])->name('produk.download-barcode');
         Route::get('/produk/{id}/download-qrcode', [ProdukController::class, 'downloadQRCode'])->name('produk.download-qrcode');
         Route::post('/produk/{id}/update-stok', [ProdukController::class, 'updateStok'])->name('produk.update-stok');
+        Route::get('/produk/{id}/variants', [ProdukController::class, 'getVariants'])->name('produk.variants');
 
         // Pelanggan
         Route::resource('pelanggan', PelangganController::class);
@@ -112,6 +115,10 @@ Route::middleware(['auth', App\Http\Middleware\MustChangePassword::class])->grou
         Route::resource('penjualan', PenjualanController::class);
         Route::post('penjualan/calculate-discount', [PenjualanController::class, 'calculateDiscount'])->name('penjualan.calculate-discount');
 
+        // QRIS Payment for Kasir
+        Route::post('/kasir/generate-qris', [PenjualanController::class, 'generateQris'])->name('kasir.generate-qris');
+        Route::post('/kasir/check-qris-status', [PenjualanController::class, 'checkQrisStatus'])->name('kasir.check-qris-status');
+
         // Print Receipt
         Route::get('/penjualan/{id}/print', [PenjualanController::class, 'print'])->name('penjualan.print');
 
@@ -125,6 +132,12 @@ Route::middleware(['auth', App\Http\Middleware\MustChangePassword::class])->grou
         Route::get('/member-orders/{id}', [AdminMemberOrderController::class, 'show'])->name('kasir.member-orders.show');
         Route::post('/member-orders/{id}/status', [AdminMemberOrderController::class, 'updateStatus'])->name('kasir.member-orders.update-status');
         Route::get('/member-orders/{id}/print', [AdminMemberOrderController::class, 'print'])->name('kasir.member-orders.print');
+
+        // Chat with Members (Kasir access)
+        Route::get('/chat', [App\Http\Controllers\Admin\ChatController::class, 'index'])->name('kasir.chat.index');
+        Route::get('/chat/{memberId}', [App\Http\Controllers\Admin\ChatController::class, 'show'])->name('kasir.chat.show');
+        Route::post('/chat/send', [App\Http\Controllers\Admin\ChatController::class, 'send'])->name('kasir.chat.send');
+        Route::get('/chat/{memberId}/messages', [App\Http\Controllers\Admin\ChatController::class, 'getMessages'])->name('kasir.chat.messages');
     });
 
 
@@ -156,13 +169,60 @@ Route::prefix('member')->name('member.')->group(function () {
         Route::get('/orders/{id}', [MemberOrderController::class, 'show'])->name('orders.show');
         Route::get('/orders/{id}/track', [MemberOrderController::class, 'track'])->name('orders.track');
         Route::get('/orders/{id}/receipt', [MemberOrderController::class, 'receipt'])->name('orders.receipt');
+        Route::post('/orders/{id}/cancel', [MemberOrderController::class, 'cancel'])->name('orders.cancel');
+
+        // Midtrans Payment Routes
+        Route::get('/payment/create/{orderId}', [MemberPaymentController::class, 'showPayment'])->name('payment.create');
+        Route::post('/payment/create', [MemberPaymentController::class, 'createPayment'])->name('payment.create.post');
+        Route::get('/payment/finish', [MemberPaymentController::class, 'finish'])->name('payment.finish');
+        Route::get('/payment/status/{orderId}', [MemberPaymentController::class, 'checkStatus'])->name('payment.status');
+        Route::post('/payment/check-status/{orderId}', [MemberPaymentController::class, 'manualCheckStatus'])->name('payment.check-status');
+
+        // Chat Routes
+        Route::get('/chat', [MemberChatController::class, 'index'])->name('chat');
+        Route::post('/chat/send', [MemberChatController::class, 'send'])->name('chat.send');
+        Route::get('/chat/messages', [MemberChatController::class, 'getMessages'])->name('chat.messages');
+
         Route::get('/profile', function() {
             $member = \Illuminate\Support\Facades\Auth::guard('member')->user();
-            return view('member.profile', compact('member'));
+            $totalSpent = \App\Models\MemberOrder::where('id_member', $member->id_member)
+                ->whereIn('status', ['paid', 'shipped', 'completed'])
+                ->sum('total');
+            $totalOrders = \App\Models\MemberOrder::where('id_member', $member->id_member)->count();
+            return view('member.profile', compact('member', 'totalSpent', 'totalOrders'));
         })->name('profile');
+        Route::post('/profile/update', function(\Illuminate\Http\Request $request) {
+            $member = \Illuminate\Support\Facades\Auth::guard('member')->user();
+            $member->nama_member = $request->nama_member;
+            $member->email = $request->email;
+            $member->no_hp = $request->no_hp;
+            $member->alamat = $request->alamat;
+            $member->save();
+            return redirect()->route('member.profile')->with('success', 'Profil berhasil diperbarui');
+        })->name('profile.update');
+        Route::post('/profile/password', function(\Illuminate\Http\Request $request) {
+            $request->validate([
+                'current_password' => 'required',
+                'password' => 'required|min:6|confirmed',
+            ]);
+
+            $member = \Illuminate\Support\Facades\Auth::guard('member')->user();
+
+            if (!\Illuminate\Support\Facades\Hash::check($request->current_password, $member->password)) {
+                return back()->with('error', 'Password lama tidak sesuai');
+            }
+
+            $member->password = \Illuminate\Support\Facades\Hash::make($request->password);
+            $member->save();
+
+            return redirect()->route('member.profile')->with('success', 'Password berhasil diubah');
+        })->name('profile.password');
         Route::get('/rewards', function() {
             $member = \Illuminate\Support\Facades\Auth::guard('member')->user();
             return view('member.redeem', compact('member'));
         })->name('rewards');
     });
 });
+
+// Midtrans Notification Handler (No Auth Required - Called by Midtrans Server)
+Route::post('/midtrans/notification', [App\Http\Controllers\Member\PaymentController::class, 'notification'])->name('midtrans.notification');

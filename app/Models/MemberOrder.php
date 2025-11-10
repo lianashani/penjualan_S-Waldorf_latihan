@@ -15,6 +15,11 @@ class MemberOrder extends Model
         'id_member',
         'order_number',
         'payment_method',
+        'snap_token',
+        'transaction_id',
+        'payment_type',
+        'payment_status',
+        'paid_at',
         'status',
         'subtotal',
         'total',
@@ -25,6 +30,7 @@ class MemberOrder extends Model
     protected $casts = [
         'total' => 'decimal:2',
         'debt_due_at' => 'datetime',
+        'paid_at' => 'datetime',
     ];
 
     public function member(): BelongsTo

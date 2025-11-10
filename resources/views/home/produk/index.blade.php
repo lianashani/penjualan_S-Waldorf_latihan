@@ -120,10 +120,15 @@
                                     @endif
                                 </td>
                                 <td>
-                                    @if($produk->is_active)
-                                        <span class="badge badge-success">Aktif</span>
+                                    @php
+                                        $stokValue = $produk->has_variants ? $produk->total_stok : $produk->stok;
+                                    @endphp
+                                    @if($stokValue <= 0)
+                                        <span class="badge badge-danger">Kosong</span>
+                                    @elseif($stokValue <= 10)
+                                        <span class="badge badge-warning">Stok Rendah</span>
                                     @else
-                                        <span class="badge badge-secondary">Nonaktif</span>
+                                        <span class="badge badge-success">Stok Aman</span>
                                     @endif
                                 </td>
                                 <td>

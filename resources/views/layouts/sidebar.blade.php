@@ -1,4 +1,4 @@
-<aside class="left-sidebar" data-sidebarbg="skin5">
+win<aside class="left-sidebar" data-sidebarbg="skin5">
     <!-- Sidebar scroll-->
     <div class="scroll-sidebar">
         <!-- Sidebar navigation-->
@@ -96,7 +96,7 @@
                 <li class="sidebar-item {{ Request::is('pelanggan*') ? 'selected' : '' }}">
                     <a class="sidebar-link waves-effect waves-dark" href="{{ route('pelanggan.index') }}" aria-expanded="false">
                         <i class="mdi mdi-account-multiple"></i>
-                        <span class="hide-menu">Pelanggan</span>
+                        <span class="hide-menu">Membership</span>
                     </a>
                 </li>
 
@@ -125,7 +125,7 @@
                 <li class="sidebar-item {{ Request::is('katalog-elegant*') ? 'selected' : '' }}">
                     <a class="sidebar-link waves-effect waves-dark" href="{{ route('katalog.elegant') }}" aria-expanded="false">
                         <i class="mdi mdi-store"></i>
-                        <span class="hide-menu">Katalog Elegan</span>
+                        <span class="hide-menu">Katalog view</span>
                     </a>
                 </li>
 
@@ -155,13 +155,13 @@
                     </a>
                 </li>
 
-                <!-- Rating Management -->
+                {{-- <!-- Rating Management -->
                 <li class="sidebar-item {{ Request::is('admin/ratings*') ? 'selected' : '' }}">
                     <a class="sidebar-link waves-effect waves-dark" href="{{ route('ratings.index') }}" aria-expanded="false">
                         <i class="mdi mdi-star"></i>
                         <span class="hide-menu">Kelola Rating</span>
                     </a>
-                </li>
+                </li> --}}
 
                 @else
                 <!-- KASIR MENU -->
@@ -187,6 +187,19 @@
                         <span><i class="mdi mdi-clipboard"></i> <span class="hide-menu">Antrian Order</span></span>
                         @if($pendingCountKasir > 0)
                             <span class="badge badge-danger">{{ $pendingCountKasir }}</span>
+                        @endif
+                    </a>
+                </li>
+                @endif
+
+                <!-- Chat Member (Kasir) -->
+                @if (Route::has('kasir.chat.index'))
+                @php($unreadCountKasir = \App\Models\MemberChat::where('sender_type','member')->where('is_read',0)->count())
+                <li class="sidebar-item {{ request()->routeIs('kasir.chat.*') ? 'selected' : '' }}">
+                    <a class="sidebar-link waves-effect waves-dark d-flex justify-content-between align-items-center" href="{{ route('kasir.chat.index') }}" aria-expanded="false">
+                        <span><i class="mdi mdi-message"></i> <span class="hide-menu">Chat Member</span></span>
+                        @if($unreadCountKasir > 0)
+                            <span class="badge badge-info">{{ $unreadCountKasir }}</span>
                         @endif
                     </a>
                 </li>

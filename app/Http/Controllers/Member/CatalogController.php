@@ -60,7 +60,10 @@ class CatalogController extends Controller
 
     public function show($id)
     {
-        $produk = Produk::with('kategori')->findOrFail($id);
+        $produk = Produk::with(['kategori', 'images' => function($query) {
+            $query->where('is_active', true)->orderBy('is_primary', 'desc')->orderBy('urutan');
+        }])->findOrFail($id);
+
         return view('member.catalog.show', compact('produk'));
     }
 }

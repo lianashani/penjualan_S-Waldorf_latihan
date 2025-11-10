@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Models\User;
 use App\Models\Produk;
 use App\Models\Kategori;
@@ -24,11 +25,19 @@ class DashboardController extends Controller
                 ->sum('total_bayar') ?? 0;
 
             // Low stock products (stock <= 10)
-            $lowStockCount = Produk::where('stok', '<=', 10)->count();
+            // For products with variants, check total_stok; for products without variants, check stok
+            $lowStockCount = Produk::where(function($query) {
+                $query->where(function($q) {
+                    $q->where('has_variants', true)->where('total_stok', '<=', 10);
+                })->orWhere(function($q) {
+                    $q->where('has_variants', false)->where('stok', '<=', 10);
+                });
+            })->count();
 
-            // Produk stok status
+            // Produk stok status - order by actual stock (total_stok for variants, stok for regular)
             $produkList = Produk::with('kategori')
-                ->orderBy('stok', 'asc')
+                ->selectRaw('*, CASE WHEN has_variants = 1 THEN total_stok ELSE stok END as actual_stock')
+                ->orderBy('actual_stock', 'asc')
                 ->limit(10)
                 ->get();
 
@@ -39,12 +48,12 @@ class DashboardController extends Controller
                 ->get();
 
             return view('home.dashboard', compact(
-                'userCount', 'jenisCount', 'produkCount', 'penjualanCount', 
+                'userCount', 'jenisCount', 'produkCount', 'penjualanCount',
                 'totalRevenue', 'lowStockCount', 'produkList', 'penjualanList'
             ));
         } catch (\Exception $e) {
             // Log error untuk debugging
-            \Log::error('Dashboard Error: ' . $e->getMessage());
+            Log::error('Dashboard Error: ' . $e->getMessage());
             dd($e->getMessage(), $e->getTraceAsString());
         }
     }

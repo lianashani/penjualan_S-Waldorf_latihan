@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Member;
 use App\Http\Controllers\Controller;
 use App\Models\Penjualan;
 use App\Models\MemberOrder;
+use App\Models\Produk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -24,6 +25,25 @@ class DashboardController extends Controller
             ->where('id_member', $member->id_member)
             ->orderByDesc('created_at')
             ->first();
-        return view('member.dashboard', compact('member', 'totalSpent', 'lastOrder'));
+
+        // New Arrivals - Latest 8 products with images
+        $newArrivals = Produk::with(['images' => function($query) {
+                $query->where('is_active', true)->orderBy('is_primary', 'desc')->orderBy('urutan');
+            }])
+            ->where('is_active', 1)
+            ->orderByDesc('created_at')
+            ->take(8)
+            ->get();
+
+        // Featured Products - Top rated or best sellers with images
+        $featuredProducts = Produk::with(['images' => function($query) {
+                $query->where('is_active', true)->orderBy('is_primary', 'desc')->orderBy('urutan');
+            }])
+            ->where('is_active', 1)
+            ->orderByDesc('stok')
+            ->take(4)
+            ->get();
+
+        return view('member.dashboard', compact('member', 'totalSpent', 'lastOrder', 'newArrivals', 'featuredProducts'));
     }
 }

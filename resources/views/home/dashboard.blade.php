@@ -160,17 +160,20 @@
                         </thead>
                         <tbody>
                             @forelse($produkList as $produk)
+                            @php
+                                $actualStok = $produk->has_variants ? $produk->total_stok : $produk->stok;
+                            @endphp
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $produk->nama_produk }}</td>
                                 <td>{{ $produk->kategori->nama_kategori ?? '-' }}</td>
-                                <td>{{ $produk->stok }}</td>
+                                <td>{{ $actualStok }}</td>
                                 <td>
-                                    @if ($produk->stok <= 0)
+                                    @if ($actualStok <= 0)
                                         <span class="label label-danger">Kosong</span>
-                                    @elseif ($produk->stok <= 10)
+                                    @elseif ($actualStok <= 10)
                                         <span class="label label-warning">Stok Rendah</span>
-                                    @elseif ($produk->stok <= 50)
+                                    @elseif ($actualStok <= 50)
                                         <span class="label label-info">Stok Sedang</span>
                                     @else
                                         <span class="label label-success">Stok Aman</span>

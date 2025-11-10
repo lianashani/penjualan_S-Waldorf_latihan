@@ -1,11 +1,52 @@
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# S-Waldorf - Sistem Penjualan
+
+Sistem penjualan dengan fitur member checkout dan integrasi Midtrans payment gateway.
+
+## 🚀 Fitur Terbaru: Midtrans Payment Gateway
+
+Member sekarang bisa checkout dengan pembayaran online menggunakan Midtrans!
+
+### Metode Pembayaran yang Tersedia:
+- ✅ Transfer Bank (Virtual Account): BCA, BNI, BRI, Mandiri, Permata
+- ✅ E-Wallet: GoPay, ShopeePay
+- ✅ Kartu Kredit/Debit
+- ✅ Bayar di Outlet (Cash on Pickup)
+
+### Setup Midtrans (5 Menit):
+
+1. **Install Dependencies** (Sudah dilakukan ✅)
+   ```bash
+   composer require midtrans/midtrans-php
+   ```
+
+2. **Tambahkan ke .env** (Copy dari `.env.midtrans`)
+   ```env
+   MIDTRANS_SERVER_KEY=SB-Mid-server-xxxxxxxxxx
+   MIDTRANS_CLIENT_KEY=SB-Mid-client-xxxxxxxxxx
+   MIDTRANS_IS_PRODUCTION=false
+   ```
+
+3. **Dapatkan Credentials:**
+   - Daftar di https://dashboard.sandbox.midtrans.com/
+   - Settings → Access Keys
+   - Copy Server Key & Client Key
+
+4. **Setup Notification URL:**
+   - Settings → Configuration
+   - Payment Notification URL: `https://your-domain.com/midtrans/notification`
+   - Untuk local: gunakan [ngrok](https://ngrok.com/) 
+
+5. **Test!**
+   - Login sebagai member
+   - Tambah produk ke cart
+   - Pilih "Bayar Online (Midtrans)"
+   - Test card: `4811 1111 1111 1114`
+
+📖 **Dokumentasi Lengkap:** [MIDTRANS_SETUP.md](MIDTRANS_SETUP.md)
+
+---
 
 ## About Laravel
 

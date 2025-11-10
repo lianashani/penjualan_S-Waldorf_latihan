@@ -16,17 +16,17 @@
 
                 <form action="{{ route('user.store') }}" method="POST">
                     @csrf
-                    
+
                     <div class="form-group">
-                        <label>Nama Lengkap <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control @error('nama_user') is-invalid @enderror" 
+                        <label>Nama Lengkap <span class="text-danger"></span></label>
+                        <input type="text" class="form-control @error('nama_user') is-invalid @enderror"
                                name="nama_user" value="{{ old('nama_user') }}" required>
                         @error('nama_user')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
 
                     <div class="form-group">
                         <label>Email <span class="text-danger">*</span></label>
-                        <input type="email" class="form-control @error('email') is-invalid @enderror" 
+                        <input type="email" class="form-control @error('email') is-invalid @enderror"
                                name="email" value="{{ old('email') }}" required>
                         @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
@@ -46,7 +46,7 @@
                     </div>
 
                     <div class="alert alert-info">
-                        <i class="mdi mdi-information"></i> 
+                        <i class="mdi mdi-information"></i>
                         User baru akan diminta mengubah password saat login pertama kali.
                     </div>
 

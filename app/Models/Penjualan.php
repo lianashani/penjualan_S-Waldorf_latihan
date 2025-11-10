@@ -10,11 +10,12 @@ class Penjualan extends Model
 {
     protected $table = 'penjualans';
     protected $primaryKey = 'id_penjualan';
-    
+
     protected $fillable = [
         'id_user',
         'id_pelanggan',
         'id_promo',
+        'payment_method',
         'total_bayar',
         'kembalian',
         'status_transaksi',

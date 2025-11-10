@@ -32,6 +32,8 @@
                 <th>#</th>
                 <th>Order</th>
                 <th>Member</th>
+                <th>Metode Bayar</th>
+                <th>Status Bayar</th>
                 <th>Status</th>
                 <th class="text-right">Total</th>
                 <th>Tanggal</th>
@@ -45,7 +47,36 @@
                   <td><code>{{ $o->order_number ?? ('#'.$o->id_order) }}</code></td>
                   <td>{{ $o->member->nama_member ?? '-' }}<br><small class="text-muted">{{ $o->member->email ?? '' }}</small></td>
                   <td>
+                    @if($o->payment_method === 'midtrans')
+                      <span class="badge badge-primary">Midtrans</span>
+                      @if($o->payment_type)
+                        <br><small class="text-muted">{{ ucwords(str_replace('_', ' ', $o->payment_type)) }}</small>
+                      @endif
+                    @else
+                      <span class="text-capitalize">{{ str_replace('_', ' ', $o->payment_method) }}</span>
+                    @endif
+                  </td>
+                  <td>
+                    @if($o->payment_method === 'midtrans')
+                      @php($paymentMap=[
+                        'pending'=>'badge-warning',
+                        'paid'=>'badge-success',
+                        'failed'=>'badge-danger',
+                        'expired'=>'badge-secondary',
+                      ])
+                      <span class="badge {{ $paymentMap[$o->payment_status ?? 'pending'] ?? 'badge-secondary' }}">
+                        {{ ucfirst($o->payment_status ?? 'pending') }}
+                      </span>
+                      @if($o->paid_at)
+                        <br><small class="text-muted">{{ $o->paid_at->format('d/m H:i') }}</small>
+                      @endif
+                    @else
+                      <span class="text-muted">-</span>
+                    @endif
+                  </td>
+                  <td>
                     @php($map=[
+                      'pending'=>'badge-secondary',
                       'awaiting_preparation'=>'badge-warning',
                       'ready_for_pickup'=>'badge-info',
                       'completed'=>'badge-success',
@@ -61,7 +92,7 @@
                   </td>
                 </tr>
               @empty
-                <tr><td colspan="7" class="text-center">Belum ada pesanan</td></tr>
+                <tr><td colspan="9" class="text-center">Belum ada pesanan</td></tr>
               @endforelse
             </tbody>
           </table>

@@ -10,6 +10,7 @@ use App\Models\ProductRating;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class ProdukController extends Controller
@@ -117,6 +118,15 @@ class ProdukController extends Controller
             }
         }
 
+        // Check if AJAX request
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Produk berhasil ditambahkan!',
+                'data' => $produk
+            ]);
+        }
+
         return redirect()->route('produk.index')
             ->with('success', 'Produk berhasil ditambahkan!');
     }
@@ -140,7 +150,7 @@ class ProdukController extends Controller
             $produk = Produk::findOrFail($id);
 
             // Debug: Log the request data
-            \Log::info('Update Product Request:', [
+            Log::info('Update Product Request:', [
                 'has_variants' => $request->has_variants,
                 'variants' => $request->variants,
                 'all_data' => $request->all()
@@ -239,7 +249,7 @@ class ProdukController extends Controller
 
             // Process each variant
             foreach ($request->variants as $index => $variantData) {
-                \Log::info("Processing variant {$index}:", $variantData);
+                Log::info("Processing variant {$index}:", $variantData);
 
                 if (isset($variantData['id_variant']) && !empty($variantData['id_variant'])) {
                     // Update existing variant
@@ -248,7 +258,7 @@ class ProdukController extends Controller
                         ->first();
 
                     if ($variant) {
-                        \Log::info("Updating existing variant {$variant->id_variant}");
+                        Log::info("Updating existing variant {$variant->id_variant}");
                         $hargaVariant = isset($variantData['harga']) && $variantData['harga'] !== null
                             ? max(0, (float)$variantData['harga'])
                             : (float)$produk->harga;
@@ -261,11 +271,11 @@ class ProdukController extends Controller
                             'is_active' => true
                         ]);
                     } else {
-                        \Log::warning("Variant not found: {$variantData['id_variant']}");
+                        Log::warning("Variant not found: {$variantData['id_variant']}");
                     }
                 } else {
                     // Create new variant
-                    \Log::info("Creating new variant");
+                    Log::info("Creating new variant");
                     $hargaVariant = isset($variantData['harga']) && $variantData['harga'] !== null
                         ? max(0, (float)$variantData['harga'])
                         : (float)$produk->harga;
@@ -316,8 +326,8 @@ class ProdukController extends Controller
 
             if ($request->hasFile('gambar')) {
                 // Delete old image if exists
-                if ($produk->gambar && \Storage::disk('public')->exists($produk->gambar)) {
-                    \Storage::disk('public')->delete($produk->gambar);
+                if ($produk->gambar && Storage::disk('public')->exists($produk->gambar)) {
+                    Storage::disk('public')->delete($produk->gambar);
                 }
                 $produk->update([
                     'gambar' => $request->file('gambar')->store('produk', 'public')
@@ -331,8 +341,8 @@ class ProdukController extends Controller
                 $image = ProductImage::find($imageId);
                 if ($image) {
                     // Delete physical file
-                    if ($image->gambar && \Storage::disk('public')->exists($image->gambar)) {
-                        \Storage::disk('public')->delete($image->gambar);
+                    if ($image->gambar && Storage::disk('public')->exists($image->gambar)) {
+                        Storage::disk('public')->delete($image->gambar);
                     }
                     $image->delete();
                 }
@@ -361,7 +371,7 @@ class ProdukController extends Controller
                 ->with('success', 'Produk berhasil diupdate!');
 
         } catch (\Exception $e) {
-            \Log::error('Update Product Error:', [
+            Log::error('Update Product Error:', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
@@ -376,8 +386,8 @@ class ProdukController extends Controller
         $produk = Produk::findOrFail($id);
 
         // Delete image if exists
-        if ($produk->gambar && \Storage::disk('public')->exists($produk->gambar)) {
-            \Storage::disk('public')->delete($produk->gambar);
+        if ($produk->gambar && Storage::disk('public')->exists($produk->gambar)) {
+            Storage::disk('public')->delete($produk->gambar);
         }
 
         $produk->delete();
@@ -759,4 +769,18 @@ class ProdukController extends Controller
 
         return back()->with('success', 'Rating berhasil dikirim! Menunggu persetujuan admin.');
     }
+
+    /**
+     * Get product variants (API for POS)
+     */
+    public function getVariants($id)
+    {
+        $variants = ProductVariant::where('id_produk', $id)
+            ->where('is_active', true)
+            ->where('stok', '>', 0)
+            ->get();
+
+        return response()->json($variants);
+    }
 }
+

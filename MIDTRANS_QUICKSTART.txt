@@ -1,0 +1,122 @@
+╔══════════════════════════════════════════════════════════════════╗
+║              MIDTRANS PAYMENT GATEWAY - QUICK SETUP              ║
+╚══════════════════════════════════════════════════════════════════╝
+
+✅ STEP 1: DAFTAR AKUN MIDTRANS
+   → Buka: https://dashboard.sandbox.midtrans.com/
+   → Klik "Sign Up" atau login jika sudah punya akun
+   → Verifikasi email
+
+✅ STEP 2: DAPATKAN API KEYS
+   → Login ke dashboard
+   → Pilih menu: Settings → Access Keys
+   → Copy "Server Key" dan "Client Key"
+
+✅ STEP 3: TAMBAHKAN KE FILE .env
+   → Buka file .env di root project
+   → Tambahkan konfigurasi berikut:
+
+   #--------------------------------------------------
+   # MIDTRANS PAYMENT GATEWAY
+   #--------------------------------------------------
+   MIDTRANS_SERVER_KEY=SB-Mid-server-xxxxxxxxxx
+   MIDTRANS_CLIENT_KEY=SB-Mid-client-xxxxxxxxxx
+   MIDTRANS_IS_PRODUCTION=false
+   MIDTRANS_IS_SANITIZED=true
+   MIDTRANS_IS_3DS=true
+
+   → Replace "xxxxxxxxxx" dengan API keys Anda
+
+✅ STEP 4: SETUP NOTIFICATION URL (PENTING!)
+   → Kembali ke Midtrans Dashboard
+   → Pilih: Settings → Configuration
+   → Isi "Payment Notification URL":
+
+   Production:
+   https://your-domain.com/midtrans/notification
+
+   Development (Local):
+   1. Install ngrok: https://ngrok.com/
+   2. Jalankan: php artisan serve
+   3. Di terminal baru: ngrok http 8000
+   4. Copy HTTPS URL (contoh: https://abc123.ngrok.io)
+   5. Paste: https://abc123.ngrok.io/midtrans/notification
+
+✅ STEP 5: JALANKAN MIGRATION (Jika belum)
+   → Buka terminal
+   → Run: php artisan migrate
+
+✅ STEP 6: TEST PAYMENT!
+   → Login sebagai member
+   → Tambah produk ke keranjang
+   → Klik "Bayar Online (Midtrans)"
+   → Gunakan test card:
+     Card Number: 4811 1111 1111 1114
+     CVV: 123
+     Expiry: 01/25
+
+╔══════════════════════════════════════════════════════════════════╗
+║                         TEST CREDENTIALS                         ║
+╚══════════════════════════════════════════════════════════════════╝
+
+💳 CREDIT CARD
+   ✓ Success: 4811 1111 1111 1114
+   ✗ Failed:  4911 1111 1111 1113
+
+🏦 VIRTUAL ACCOUNT
+   → Pilih bank di Snap popup
+   → Nomor VA akan otomatis di-generate
+   → Gunakan simulator di dashboard untuk test payment
+
+💰 E-WALLET
+   → GoPay: Akan redirect ke simulator
+   → ShopeePay: Akan redirect ke simulator
+
+╔══════════════════════════════════════════════════════════════════╗
+║                        TROUBLESHOOTING                           ║
+╚══════════════════════════════════════════════════════════════════╝
+
+❌ Popup Midtrans tidak muncul?
+   → Cek MIDTRANS_CLIENT_KEY di .env
+   → Clear browser cache
+   → Cek console browser (F12)
+
+❌ Payment stuck di "pending"?
+   → Pastikan Notification URL sudah di-set
+   → Untuk local, pastikan ngrok running
+   → Cek logs: tail -f storage/logs/laravel.log
+
+❌ Error "Invalid signature key"?
+   → Pastikan MIDTRANS_SERVER_KEY benar
+   → Pastikan tidak ada spasi di .env
+
+╔══════════════════════════════════════════════════════════════════╗
+║                    PRODUCTION CHECKLIST                          ║
+╚══════════════════════════════════════════════════════════════════╝
+
+Sebelum go live:
+
+□ Ganti ke Production API Keys
+  MIDTRANS_SERVER_KEY=production-key
+  MIDTRANS_CLIENT_KEY=production-key
+  MIDTRANS_IS_PRODUCTION=true
+
+□ Update Snap script di view:
+  resources/views/member/cart/index.blade.php
+  Ganti: app.sandbox.midtrans.com → app.midtrans.com
+
+□ Set Notification URL ke domain production
+
+□ Test dengan transaksi real (amount kecil)
+
+□ Monitor dashboard Midtrans
+
+╔══════════════════════════════════════════════════════════════════╗
+║                       BUTUH BANTUAN?                             ║
+╚══════════════════════════════════════════════════════════════════╝
+
+📚 Dokumentasi Lengkap: MIDTRANS_SETUP.md
+🌐 Midtrans Docs: https://docs.midtrans.com/
+💬 Support: support@midtrans.com
+
+Happy Coding! 🚀

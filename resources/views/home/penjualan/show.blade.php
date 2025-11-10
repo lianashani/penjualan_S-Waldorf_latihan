@@ -162,18 +162,24 @@
                                     </tr>
                                     @endif
                                     <tr class="border-top">
-                                        <td><strong>Total Setelah Diskon:</strong></td>
+                                        <td><strong>Total:</strong></td>
                                         <td class="text-right"><h4 class="text-success">Rp. {{ number_format($penjualan->total_bayar, 0, ',', '.') }}</h4></td>
+                                    </tr>
+                                    @if($penjualan->payment_method === 'cash')
+                                    <tr>
+                                        <td><strong>Bayar:</strong></td>
+                                        <td class="text-right"><h5>Rp. {{ number_format($penjualan->total_bayar + $penjualan->kembalian, 0, ',', '.') }}</h5></td>
                                     </tr>
                                     <tr>
                                         <td><strong>Kembalian:</strong></td>
                                         <td class="text-right"><h5>Rp. {{ number_format($penjualan->kembalian, 0, ',', '.') }}</h5></td>
                                     </tr>
+                                    @endif
                                 </table>
 
                                 @if($diskon > 0)
                                 <div class="alert alert-success">
-                                    <i class="mdi mdi-check-circle"></i> 
+                                    <i class="mdi mdi-check-circle"></i>
                                     <strong>Hemat Rp. {{ number_format($diskon, 0, ',', '.') }}</strong> dengan promo {{ $penjualan->promo->kode_promo }}!
                                 </div>
                                 @endif
@@ -186,9 +192,9 @@
                     <a href="{{ route('penjualan.index') }}" class="btn btn-secondary">
                         <i class="mdi mdi-arrow-left"></i> Kembali
                     </a>
-                    <button onclick="window.print()" class="btn btn-primary">
+                    <a href="{{ route('penjualan.print', $penjualan->id_penjualan) }}" class="btn btn-primary" target="_blank">
                         <i class="mdi mdi-printer"></i> Cetak Struk
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
@@ -199,13 +205,83 @@
 @push('styles')
 <style>
 @media print {
-    .sidebar, .topbar, .page-breadcrumb, .btn, .card-header {
+    /* Hide all non-essential elements */
+    .sidebar,
+    .left-sidebar,
+    .topbar,
+    .navbar,
+    .page-breadcrumb,
+    .footer,
+    .btn,
+    .no-print,
+    .card-header,
+    body > *:not(.page-wrapper),
+    .page-wrapper > *:not(.page-content),
+    .page-content > *:not(.container-fluid),
+    nav,
+    .breadcrumb {
         display: none !important;
     }
+
+    /* Reset page wrapper and content */
+    body {
+        margin: 0 !important;
+        padding: 0 !important;
+        background: white !important;
+    }
+
+    .page-wrapper {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .page-content {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .container-fluid {
+        margin: 0 !important;
+        padding: 15px !important;
+        max-width: 100% !important;
+    }
+
+    .row {
+        margin: 0 !important;
+    }
+
+    .col-12 {
+        padding: 0 !important;
+    }
+
+    /* Clean up card */
     .card {
         border: none !important;
         box-shadow: none !important;
+        margin: 0 !important;
     }
+
+    .card-body {
+        padding: 10px !important;
+    }
+
+    /* Make receipt look clean */
+    table {
+        page-break-inside: avoid;
+    }
+
+    /* Show only printable content */
+    .printable-area {
+        display: block !important;
+        margin: 0 auto;
+        max-width: 80mm; /* Thermal printer width */
+        font-size: 12px;
+    }
+}
+
+/* Add printable area class wrapper */
+.print-content {
+    padding: 20px;
 }
 </style>
 @endpush

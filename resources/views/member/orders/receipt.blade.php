@@ -31,12 +31,22 @@
         <div class="brand">S&WALDORF</div>
         <div class="meta">Order: <strong>{{ $order->order_number ?? ('#'.$order->id_order) }}</strong></div>
         <div class="meta">Tanggal: {{ $order->created_at->format('d M Y H:i') }}</div>
+        @if($order->payment_method === 'midtrans' && $order->transaction_id)
+          <div class="meta">Trx ID: {{ $order->transaction_id }}</div>
+        @endif
       </div>
       <div style="text-align:right">
         <div class="meta">Member: <strong>{{ $order->member->nama_member ?? '-' }}</strong></div>
         <div class="meta">Email: {{ $order->member->email ?? '-' }}</div>
         <div class="meta">No HP: {{ $order->member->no_hp ?? '-' }}</div>
-        <div style="margin-top:8px"><span class="badge">{{ str_replace('_',' ', strtoupper($order->status)) }}</span></div>
+        <div style="margin-top:8px">
+          <span class="badge">{{ str_replace('_',' ', strtoupper($order->status)) }}</span>
+          @if($order->payment_method === 'midtrans')
+            <br><span class="badge" style="margin-top:4px; background:#10b981; color:#fff; border-color:#10b981">
+              {{ strtoupper($order->payment_status) }}
+            </span>
+          @endif
+        </div>
       </div>
     </div>
 
@@ -72,20 +82,42 @@
     </table>
 
     <div class="note">
-      Tunjukkan struk ini saat pengambilan. Status saat ini: 
+      @if($order->payment_method === 'midtrans')
+        <strong>Pembayaran Online via Midtrans</strong>
+        @if($order->payment_type)
+          - {{ ucwords(str_replace('_', ' ', $order->payment_type)) }}
+        @endif
+        @if($order->paid_at)
+          <br>Dibayar pada: {{ $order->paid_at->format('d M Y H:i') }}
+        @endif
+        <br><br>
+      @endif
+
+      Tunjukkan struk ini saat pengambilan. Status saat ini:
       @if($order->status === 'ready_for_pickup')
         <strong>SIAP DIAMBIL</strong>.
       @elseif($order->status === 'awaiting_preparation')
         <strong>SEDANG DIPERSIAPKAN</strong>.
+      @elseif($order->status === 'pending')
+        <strong>MENUNGGU PEMBAYARAN</strong>.
       @elseif($order->status === 'completed')
-        <strong>SELESAI (LUNAS DI OUTLET)</strong>.
+        <strong>SELESAI</strong>.
       @elseif($order->status === 'cancelled')
         <strong>DIBATALKAN</strong>.
       @endif
     </div>
 
     <div class="footer">
-      <div>Metode: Bayar di Outlet (in_store)</div>
+      <div>
+        Metode Pembayaran:
+        @if($order->payment_method === 'midtrans')
+          <strong>Midtrans (Online)</strong>
+        @elseif($order->payment_method === 'in_store')
+          <strong>Bayar di Outlet</strong>
+        @else
+          <strong>{{ ucfirst($order->payment_method) }}</strong>
+        @endif
+      </div>
       <div>Terima kasih telah berbelanja di S&WALDORF</div>
     </div>
   </div>
